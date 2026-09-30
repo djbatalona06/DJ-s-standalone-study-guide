@@ -147,6 +147,21 @@ async function answerAny(page) {
   await context.close();
 }
 
+// ------------------------------------------------------ typed recall (review)
+{
+  const { page, context } = await learner();
+  await page.goto(U + '#/review/a1'); await page.waitForSelector('#recall-mode');
+  await page.locator('#recall-mode').click();
+  await page.locator('#recall-input').fill('some words that are not the answer');
+  await page.keyboard.press('Enter');
+  await page.waitForSelector('[role=status]:has-text("Suggested:")');
+  ok(/You choose the grade/.test(await text(page)), 'typing an answer reveals it with a verdict and a suggested grade, never an automatic one');
+  await page.keyboard.press('1');
+  await page.waitForSelector('#recall-input');
+  ok(await page.evaluate(() => document.activeElement?.id === 'recall-input'), 'the next card puts the cursor in the typing box');
+  await context.close();
+}
+
 // ------------------------------------------------------------------- axe
 for (const scheme of ['light', 'dark']) {
   const { page, context } = await learner({ scheme, bypassCSP: true });
@@ -166,6 +181,9 @@ for (const scheme of ['light', 'dark']) {
   ok(await page.evaluate(() => document.documentElement.hasAttribute('data-calm') && document.documentElement.style.fontSize === '125%'), `calm and larger text apply to the page (${scheme})`);
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `no sideways scroll at larger text (${scheme})`);
   await audit('#/me calm + larger text');
+  await page.goto(U + '#/review/a1'); await page.waitForSelector('#recall-mode');
+  await page.locator('#recall-mode').click(); await page.locator('#recall-input').fill('a guess'); await page.keyboard.press('Enter');
+  await page.waitForSelector('[role=status]:has-text("Suggested:")'); await audit('a typed-recall review');
   await page.goto(U + '#/learn'); await page.goto(U + '#/quiz/a1-d2'); await page.waitForSelector('text=Check answer'); await audit('a quiz question');
   await page.goto(U + '#/exam/a1'); await page.waitForSelector('text=Start exam'); await audit('the exam intro');
   await context.close();
