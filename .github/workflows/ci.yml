@@ -1,0 +1,17 @@
+# CI: runs the same checks you run locally, on every PR and every push to main.
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4          # get the repo's code onto the runner
+      - uses: actions/setup-node@v4        # install Node (LTS) and cache npm downloads
+        with: { node-version: lts/*, cache: npm }
+      - run: npm ci                        # clean install exactly what package-lock.json pins
+      - run: npm run typecheck             # TypeScript errors fail the build
+      - run: npm test                      # Vitest unit tests
+      - run: npm run build                 # the production build must succeed
