@@ -40,6 +40,8 @@ export interface DiagramArt {
   viewBox: '0 0 100 100';
   /** One hit area per part id. */
   shapes: Record<string, Rect>;
-  /** Drawn under the parts, never interactive: the board, traces, slot lines. */
+  /** Drawn under the parts, never interactive: the board, holes, traces. */
   decor: Array<{ d: string; fill?: boolean }>;
+  /** Drawn over the parts, never interactive: pins, slot dividers, fins. */
+  detail: string[];
 }

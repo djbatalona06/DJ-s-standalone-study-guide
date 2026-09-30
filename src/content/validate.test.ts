@@ -40,7 +40,7 @@ describe('validateDiagram', () => {
 
   it('accepts a complete diagram', () => {
     expect(validateDiagram(diagram, [card], {
-      viewBox: '0 0 100 100', shapes: { p: { x: 0, y: 0, w: 10, h: 10 } }, decor: [],
+      viewBox: '0 0 100 100', shapes: { p: { x: 0, y: 0, w: 10, h: 10 } }, decor: [], detail: [],
     })).toEqual([]);
   });
 
@@ -52,7 +52,7 @@ describe('validateDiagram', () => {
         parts: [...diagram.parts, { id: 'p', label: 'Part', cardId: 'nope' }],
       },
       [card],
-      { viewBox: '0 0 100 100', shapes: { p: { x: 95, y: 0, w: 10, h: 10 }, q: { x: 0, y: 0, w: 1, h: 1 } }, decor: [] },
+      { viewBox: '0 0 100 100', shapes: { p: { x: 95, y: 0, w: 10, h: 10 }, q: { x: 0, y: 0, w: 1, h: 1 } }, decor: [], detail: [] },
     );
     expect(problems).toEqual([
       'diagram d has no text alternative',

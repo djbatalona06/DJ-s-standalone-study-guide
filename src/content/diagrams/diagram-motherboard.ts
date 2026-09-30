@@ -25,12 +25,30 @@ const art: DiagramArt = {
     { d: 'M3 3 H97 V97 H3 Z', fill: true },
     // Mounting holes.
     { d: 'M7 44 h2 v2 h-2 Z M91 7 h2 v2 h-2 Z M91 91 h2 v2 h-2 Z M7 91 h2 v2 h-2 Z' },
-    // DIMM slot dividers, so four slots read as four.
-    { d: 'M67.5 9 V47 M71 9 V47 M74.5 9 V47' },
-    // The CPU's pin field.
-    { d: 'M32 19 H48 V35 H32 Z' },
     // Traces from the socket to the chipset and slots.
     { d: 'M40 39 V46 M52 30 H58 V58 M54 51 H60 V58 M26 61 H58' },
+  ],
+  detail: [
+    // Rear I/O: stacked USB, Ethernet, audio.
+    'M8.5 12 h7 v4 h-7 Z M8.5 20 h7 v6 h-7 Z M8.5 30 h7 v5 h-7 Z',
+    // EPS pin row.
+    'M24 7.5 H30',
+    // The CPU's pin field.
+    'M32 19 H48 V35 H32 Z M36 19 V35 M40 19 V35 M44 19 V35 M32 23 H48 M32 27 H48 M32 31 H48',
+    // Four DIMM slots read as four.
+    'M67.5 9 V47 M71 9 V47 M74.5 9 V47',
+    // 24-pin: two rows.
+    'M86.3 18 V40 M88.7 18 V40',
+    // PCIe key notches.
+    'M20 49 V54 M12 59 V63',
+    // M.2 standoff.
+    'M41 69.5 h1.5 v2 h-1.5 Z',
+    // Chipset heatsink fins.
+    'M63 61 V74 M66 61 V74 M69 61 V74 M72 61 V74',
+    // SATA: four ports.
+    'M81 59.5 H92 M81 64 H92 M81 68.5 H92',
+    // Header pin rows.
+    'M64 87.5 H71 M81 87.5 H89',
   ],
 };
 

@@ -17,6 +17,26 @@ export function useSettings(): SettingsRow {
   return { ...defaultSettings(), ...stored };
 }
 
+/**
+ * The settings row as stored: `undefined` while loading, `null` before the
+ * boot code has created it. The shell uses this to decide on onboarding without
+ * flashing the welcome screen at somebody who has already been through it.
+ */
+export function useSettingsRow(): SettingsRow | null | undefined {
+  return useLiveQuery(async () => {
+    const stored = await db.settings.get('me');
+    return stored ? { ...defaultSettings(), ...stored } : null;
+  }, []);
+}
+
+/** Every day with a finished session, for the streak. */
+export function useStudyDays(): string[] | undefined {
+  return useLiveQuery(async () => {
+    const rows = await db.sessions.toArray();
+    return rows.filter((row) => row.endedAt !== undefined).map((row) => row.dayKey);
+  }, []);
+}
+
 export function useToday(): string {
   const { timeZone } = useSettings();
   return todayKey(timeZone);
