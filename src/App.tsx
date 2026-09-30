@@ -4,6 +4,8 @@ import { Shell } from './components/Shell';
 import { FlashcardsPage } from './features/flashcards/FlashcardsPage';
 import { LearnPage } from './features/learn/LearnPage';
 import { MePage } from './features/me/MePage';
+import { NodePage } from './features/path/NodePage';
+import { PathPage } from './features/path/PathPage';
 import { ReviewSession } from './features/review/ReviewSession';
 import { TodayPage } from './features/today/TodayPage';
 import { useSettingsRow } from './features/useApp';
@@ -53,6 +55,8 @@ export function App() {
       {route.name === 'today' && <TodayPage />}
       {route.name === 'learn' && <LearnPage />}
       {route.name === 'me' && <MePage />}
+      {route.name === 'path' && <PathPage />}
+      {route.name === 'node' && <NodePage key={route.id} id={route.id} />}
       {route.name === 'flashcards' && <FlashcardsPage key={route.deck} deckId={route.deck} />}
       {route.name === 'diagram' && (
         <Suspense fallback={<Loading />}>

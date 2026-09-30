@@ -110,6 +110,12 @@ DoD: the path renders with correct locked/available states from real progress; e
 
 ---
 
+**Progress (2026-09-30, career pathway):**
+- Done: tasks 1–4 except the Path node's booking card links being verified. 17 nodes in five stages; a pure `pathway/` module (statuses, next actions, stage, validation of cycles, missing prerequisites, later-stage requirements and unsourced figures); `pathProgress` in Dexie schema 3 with backup merge (newest change wins); Path and node screens; the character's stages drawn and shown on Today, Review and results screens.
+- Pay: two BLS figures (help desk $62,890, sysadmin $99,130, May 2025) with source and retrieval date, both with projected declines shown. No figure for the cloud role (no matching occupation). A test fails if any other node gains a figure without a source.
+- Not verified: CompTIA's pages could not be reached from the build environment, so the certifier links were not opened. Weights, exam codes and links still need checking on CompTIA's site.
+- Initial JS 128 kB gzip against the 150 kB budget.
+
 ## Phase 5 — Polish, accessibility, offline (M)
 
 Tasks: full keyboard and screen-reader walk of every screen; calm mode and reduced motion; strict CSP; Lighthouse ≥ 95; precache audit (diagram and exam chunks lazy); install prompt; error and empty states from `04`; backup reminder.

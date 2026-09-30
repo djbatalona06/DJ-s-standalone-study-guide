@@ -1,7 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Flame } from 'lucide-react';
-import { Sprite } from '@/art/Sprite';
-import { STAGE_FRAMES } from '@/art/sprites';
 import { Button } from '@/components/ui/8bit/button';
 import XpBar from '@/components/ui/8bit/xp-bar';
 import { Meter } from '@/components/Meter';
@@ -17,7 +15,10 @@ import { readiness } from '@/domain/mastery/readiness';
 import { streak } from '@/domain/streak';
 import { XP_DAILY_CAP } from '@/domain/xp/kinds';
 import { useQuizAccuracy, useSettings, useStates, useStudyDays, useToday } from '../useApp';
+import { Character } from '../Character';
 import { useLibrary } from '../useLibrary';
+import { useStage } from '../usePath';
+import { levelOf } from '@/domain/pathway/pathway';
 
 function greeting(hour: number): string {
   if (hour < 5) return 'Up late';
@@ -31,6 +32,7 @@ export function TodayPage() {
   const day = useToday();
   const states = useStates();
   const library = useLibrary();
+  const stage = useStage();
   const quiz = useQuizAccuracy();
   const studied = useStudyDays();
   const pending = useLiveQuery(async () => {
@@ -72,13 +74,13 @@ export function TodayPage() {
   return (
     <>
       <header className="mb-8 flex items-center gap-5">
-        <Sprite frames={STAGE_FRAMES.Foundations ?? []} size={88} label={`${name}, typing on a laptop`} />
+        <Character size={88} label={`${name}, typing on a laptop`} />
         <div className="min-w-0">
           <h1 className="cursor font-pixel text-sm leading-relaxed">
             {greeting(new Date().getHours())}, {name}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Lvl 1 · Foundations · {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+            Lvl {levelOf(stage)} · {stage} · {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
           </p>
           <p className="mt-2 inline-flex items-center gap-2 text-sm">
             <Flame aria-hidden="true" className="size-4 text-(--color-xp)" />

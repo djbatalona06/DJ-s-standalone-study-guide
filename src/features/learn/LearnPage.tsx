@@ -6,24 +6,18 @@ import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
 import { go } from '@/app/useRoute';
 import { diagramsOf } from '@/content/diagrams';
-import { TRACKS, domainsOf, type Library, type TrackId } from '@/content';
-import type { CardState } from '@/domain/srs/srs';
+import { TRACKS, domainsOf, type TrackId } from '@/content';
 import { TRACKS_WITH_QUESTIONS } from '@/content/questions';
 import { bookingAdvice } from '@/domain/mastery/booking';
-import { domainMastery, readiness } from '@/domain/mastery/readiness';
-import { useQuizAccuracy, useRecentExams, useStates } from '../useApp';
+import { domainMastery } from '@/domain/mastery/readiness';
+import { useQuizAccuracy, useStates } from '../useApp';
 import { useLibrary } from '../useLibrary';
+import { useReadiness } from '../useReadiness';
 
 /** Every track's hooks in one component, so the page can map over tracks without hooks in a loop. */
-function Booking({ trackId, states, quiz, library }: { trackId: TrackId; states: Map<string, CardState>; quiz: Map<string, number>; library: Library }) {
-  const exams = useRecentExams(trackId);
-  if (!exams) return null;
-  const ready = readiness(
-    domainsOf(trackId).map((d) => ({ id: d.id, weight: d.weight, cardIds: library.cardsOfDomain(d.id).map((c) => c.id) })),
-    states,
-    quiz,
-  ).readiness;
-  return <p className="text-sm">{bookingAdvice(ready, exams).message}</p>;
+function Booking({ trackId }: { trackId: TrackId }) {
+  const progress = useReadiness(trackId);
+  return progress ? <p className="text-sm">{bookingAdvice(progress.readiness, progress.exams).message}</p> : null;
 }
 
 export function LearnPage() {
@@ -99,7 +93,7 @@ export function LearnPage() {
                 );
               })}
             </ul>
-            {track.exam && TRACKS_WITH_QUESTIONS.includes(track.id) ? <Booking trackId={track.id} states={states} quiz={quiz} library={library} /> : null}
+            {track.exam && TRACKS_WITH_QUESTIONS.includes(track.id) ? <Booking trackId={track.id} /> : null}
             {TRACKS_WITH_QUESTIONS.includes(track.id) ? (
               <div className="mt-2 grid gap-4 sm:grid-cols-2">
                 <Button asChild variant="secondary" className="h-12"><a href={href({ name: 'quiz', scope: track.id })}>Quick quiz</a></Button>
