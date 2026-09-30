@@ -38,12 +38,12 @@ export function App() {
   // First run: the welcome flow renders in place until it is finished.
   if (!settings?.onboardedAt || route.name === 'welcome') return <WelcomePage />;
 
-  // A review is one thing, not a page: no tab bar.
-  if (route.name === 'review') {
+  // A review (or a study round) is one thing, not a page: no tab bar.
+  if (route.name === 'review' || route.name === 'study') {
     return (
       <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
         <Suspense fallback={<Loading />}>
-          <ReviewSession trackId={route.track} onExit={() => go({ name: 'today' })} />
+          <ReviewSession key={route.name} trackId={route.track} study={route.name === 'study'} onExit={() => go({ name: route.name === 'study' ? 'learn' : 'today' })} />
         </Suspense>
       </main>
     );
