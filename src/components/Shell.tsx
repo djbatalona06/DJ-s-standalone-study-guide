@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { BookOpen, Terminal, User } from 'lucide-react';
+import { BookOpen, Milestone, Terminal, User } from 'lucide-react';
 import { href, type Route } from '@/app/route';
 import { cn } from '@/lib/utils';
 
 const TABS = [
   { route: { name: 'today' }, label: 'Today', Icon: Terminal },
   { route: { name: 'learn' }, label: 'Learn', Icon: BookOpen },
+  { route: { name: 'path' }, label: 'Path', Icon: Milestone },
   { route: { name: 'me' }, label: 'Me', Icon: User },
 ] as const satisfies ReadonlyArray<{ route: Route; label: string; Icon: unknown }>;
 
@@ -14,7 +15,7 @@ const TABS = [
  * links, so the browser's own back button and middle-click work.
  */
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
-  const current = route.name === 'diagram' || route.name === 'flashcards' ? 'learn' : route.name;
+  const current = route.name === 'diagram' || route.name === 'flashcards' ? 'learn' : route.name === 'node' ? 'path' : route.name;
   return (
     <div className="min-h-dvh min-[900px]:grid min-[900px]:grid-cols-[220px_1fr]">
       <nav

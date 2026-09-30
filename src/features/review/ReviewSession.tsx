@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
-import { Sprite } from '@/art/Sprite';
-import { STAGE_FRAMES } from '@/art/sprites';
 import { Button } from '@/components/ui/8bit/button';
 import { Kbd } from '@/components/ui/8bit/kbd';
 import { Progress } from '@/components/ui/8bit/progress';
@@ -18,6 +16,7 @@ import {
 import { todayKey } from '../../domain/day';
 import { buildQueue, requeue } from '../../domain/srs/queue';
 import { GRADES, type Grade } from '../../domain/srs/srs';
+import { Character } from '../Character';
 import { XpLine } from '../XpLine';
 
 interface Props {
@@ -151,7 +150,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
     const accuracy = tally.reviewed ? Math.round((tally.correct / tally.reviewed) * 100) : 0;
     return (
       <section aria-live="polite" className="flex flex-col items-center gap-6 text-center">
-        <Sprite frames={STAGE_FRAMES.Foundations ?? []} size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
+        <Character size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
         <h1 className="font-pixel text-sm leading-relaxed">Session done</h1>
         <Panel className="w-full text-left">
           <p className="font-pixel text-2xl">{tally.reviewed} cards</p>

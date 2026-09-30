@@ -148,3 +148,37 @@ describe('backups carry quiz progress', () => {
     await expect(importProgress(file)).resolves.toMatchObject({ answersAdded: 0, examsAdded: 0 });
   });
 });
+
+describe('career path progress', () => {
+  it('records what was started and done, and keeps the first start time', async () => {
+    const { setMark, loadMarks } = await import('./index');
+    await setMark('n1', 'started', 1000);
+    await setMark('n1', 'done', 5000);
+    expect((await loadMarks()).get('n1')).toBe('done');
+    expect(await db.pathProgress.get('n1')).toMatchObject({ status: 'done', startedAt: 1000, doneAt: 5000, updatedAt: 5000 });
+    await setMark('n1', 'started', 9000); // reopened as in progress: no longer done
+    expect(await db.pathProgress.get('n1')).toMatchObject({ status: 'started', startedAt: 1000, doneAt: undefined });
+    await setMark('n1', null, 9500);
+    expect((await loadMarks()).has('n1')).toBe(false);
+  });
+
+  it('travels in a backup, the newest change wins, and old backups still import', async () => {
+    const { setMark, exportProgress, importProgress } = await import('./index');
+    await setMark('n1', 'done', 2000);
+    await setMark('n2', 'started', 3000);
+    const file = await exportProgress(9000);
+    expect(file.pathProgress).toHaveLength(2);
+
+    await db.delete();
+    await db.open();
+    await setMark('n1', 'started', 4000); // newer than the backup's 2000
+    const summary = await importProgress(file);
+    expect(summary.pathUpdated).toBe(1); // n2 only
+    expect((await db.pathProgress.get('n1'))?.status).toBe('started');
+    expect((await db.pathProgress.get('n2'))?.status).toBe('started');
+
+    const old = await exportProgress(9500);
+    delete old.pathProgress;
+    await expect(importProgress(old)).resolves.toMatchObject({ pathUpdated: 0 });
+  });
+});

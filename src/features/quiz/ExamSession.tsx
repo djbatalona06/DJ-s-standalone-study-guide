@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Flag, List, X } from 'lucide-react';
-import { Sprite } from '@/art/Sprite';
-import { STAGE_FRAMES } from '@/art/sprites';
 import { Button } from '@/components/ui/8bit/button';
 import { Meter } from '@/components/Meter';
 import { Panel } from '@/components/Panel';
@@ -20,6 +18,7 @@ import { buildExam, examMinutes } from '../../domain/quiz/pick';
 import * as clock from '../../domain/quiz/clock';
 import { isAnswered, isCorrect, scoreExam } from '../../domain/quiz/score';
 import { useSettings } from '../useApp';
+import { Character } from '../Character';
 import { XpLine } from '../XpLine';
 import { QuestionView } from './QuestionView';
 
@@ -332,7 +331,7 @@ function ExamResults({ exam, questions, sent, queued, onExit, onAgain }: {
 
   return (
     <section aria-live="polite" className="flex flex-col items-center gap-6">
-      <Sprite frames={STAGE_FRAMES.Foundations ?? []} size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
+      <Character size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
       <h1 className="font-pixel text-sm leading-relaxed">Exam done</h1>
       <Panel className="w-full">
         <p className="font-pixel text-2xl">{pct}%</p>

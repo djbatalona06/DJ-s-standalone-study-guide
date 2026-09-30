@@ -28,7 +28,7 @@
 
 - One original 8-bit character: a hacker working his way through the roles, from help desk to sysadmin to cloud. **The learner names him** at onboarding (Me can rename him). Nothing in the code or the copy gives him a default name.
 - Drawn in code as a 16×16 grid of role characters (`src/art/sprites.ts`, HeartBeat's sprite format), so he recolours with the theme and there is no image to license.
-- **Stages** follow the career path: Foundations (hoodie, laptop) → Help desk (headset) → Specialize → Sysadmin → Cloud. Only Foundations is drawn so far; the others come with the Path screen.
+- **Stages** follow the career path: Foundations (hoodie, laptop) → Help desk (headset) → Specialize → Sysadmin → Cloud. All five are drawn: each is the Foundations sprite plus one accessory (headset, ID badge, terminal prompt, clouds), so the character visibly carries his career with him.
 - **Where he appears:** onboarding, the Today header (greeting, level, stage), the end of a review, empty states. He idles (typing) but never cheers on every tap: XP stays quiet (§1).
 
 ## 3. Key components

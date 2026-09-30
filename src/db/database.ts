@@ -3,6 +3,7 @@ import type { CardState, Grade } from '../domain/srs/srs';
 import type { OutboxEntry } from '../domain/xp/outbox';
 import type { SessionMode } from '../domain/xp/kinds';
 import type { Answer, TrackId } from '../content/types';
+import type { Mark } from '../domain/pathway/pathway';
 
 /**
  * Progress only. Content lives in the bundle, so a content update never
@@ -50,6 +51,16 @@ export interface ExamRow {
   total: number;
 }
 
+/** What the learner has said about one career-path node. No row means untouched. */
+export interface PathProgressRow {
+  nodeId: string;
+  status: Mark;
+  startedAt?: number;
+  doneAt?: number;
+  /** The newest change wins when a backup is merged. */
+  updatedAt: number;
+}
+
 export interface SessionRow {
   /** Also the XP `sessionId`, so a retry is the same session to HeartBeat. */
   id: string;
@@ -92,6 +103,7 @@ export class LanternDB extends Dexie {
   settings!: Table<SettingsRow, string>;
   quizAnswers!: Table<QuizAnswerRow, string>;
   exams!: Table<ExamRow, string>;
+  pathProgress!: Table<PathProgressRow, string>;
 
   constructor(name = 'lantern') {
     super(name);
@@ -107,6 +119,7 @@ export class LanternDB extends Dexie {
       quizAnswers: 'id, questionId, domainId, at, sessionId',
       exams: 'id, trackId, status',
     });
+    this.version(3).stores({ pathProgress: 'nodeId, status' });
   }
 }
 

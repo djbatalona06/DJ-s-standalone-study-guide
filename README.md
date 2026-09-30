@@ -109,17 +109,37 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
   library is a lazy chunk too (`src/content/library.ts`, read through `useLibrary`), which keeps the initial
   JavaScript near 118 kB gzip against the 150 kB budget.
 
+## What exists (career path)
+
+- **Path tab:** 17 steps in five stages, Foundations to Cloud (A+, Network+, Security+, a cloud
+  fundamentals and associate certification, Linux, scripting, Windows Server, three projects, and the
+  help desk, sysadmin and cloud roles). Each step is locked, open, in progress or done, from what
+  you mark and what it requires; nothing is assumed. The pathway is checked for cycles, missing
+  prerequisites and requirements from a later stage (`src/domain/pathway/`).
+- **Your character moves up:** finishing a role or certification that opens the next stage changes his
+  sprite (headset, ID badge, terminal prompt, clouds). The Today header shows the level.
+- **A+ steps show your booking rule** (readiness and your last two exams at 85%) and, once you meet
+  it, a link to the certifier. The app never books or sells anything.
+- **Pay and demand** appear only with a cited source and retrieval date, and only for an occupation the
+  source covers: US Bureau of Labor Statistics figures for help desk (median $62,890, May 2025) and
+  sysadmin ($99,130), retrieved 2026-09-30. Both show projected employment *falling* (−3% and −4%,
+  2025–35), and the screen says so. There is no figure for the cloud role.
+- **The certifier links are unverified:** CompTIA's site could not be reached from the build
+  environment, so the addresses in `src/content/pathway.ts` were not opened. Confirm them, and the
+  current exam codes, weights and objectives, on CompTIA's own site.
+
 ## What is not built yet
 
-CS50 quizzes, the career
-pathway (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
+CS50 quizzes, a Lighthouse
+pass, and a headless keyboard test in CI. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
 
 Good first changes if you want to learn the codebase:
 
-- **Draw the help desk sprite.** Copy `hacker-idle-a` in `src/art/sprites.ts`, give him a
-  headset, and run `npm test`. The test tells you if a row is the wrong length.
+- **Redraw a stage.** The four later stages are the Foundations sprite plus one accessory each
+  (`HEADSET`, `BADGE`, `PROMPT`, `CLOUDS` in `src/art/sprites.ts`). Change those pixels, or give the
+  sysadmin his own sprite, and run `npm test`. The test tells you if a row is the wrong length.
 - **Add a diagram.** Copy an entry in `src/content/diagrams/catalog.ts` and a `diagram-*.ts` art file
   (the helpers in `draw.ts` build the paths), write one card per part, then run `npm test`.
   `validateDiagram` lists what is missing and whether two parts overlap. Try SFP and other transceivers,

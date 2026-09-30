@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, X } from 'lucide-react';
-import { Sprite } from '@/art/Sprite';
-import { STAGE_FRAMES } from '@/art/sprites';
 import { Button } from '@/components/ui/8bit/button';
 import { Progress } from '@/components/ui/8bit/progress';
 import { Panel } from '@/components/Panel';
@@ -15,6 +13,7 @@ import { todayKey } from '../../domain/day';
 import { pickQuiz } from '../../domain/quiz/pick';
 import { isAnswered } from '../../domain/quiz/score';
 import { useSettings } from '../useApp';
+import { Character } from '../Character';
 import { XpLine } from '../XpLine';
 import { QuestionView, shownAnswer } from './QuestionView';
 import { resolveScope } from './scope';
@@ -145,7 +144,7 @@ function QuizSession({ scope, onExit, onAgain }: { scope: string; onExit: () => 
     const pct = tally.answered ? Math.round((tally.correct / tally.answered) * 100) : 0;
     return (
       <section aria-live="polite" className="flex flex-col items-center gap-6 text-center">
-        <Sprite frames={STAGE_FRAMES.Foundations ?? []} size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
+        <Character size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
         <h1 className="font-pixel text-sm leading-relaxed">Quiz done</h1>
         <Panel className="w-full text-left">
           <p className="font-pixel text-2xl">{tally.correct}/{tally.answered} right</p>
