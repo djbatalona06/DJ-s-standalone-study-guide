@@ -1,4 +1,5 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
+import { textScale } from './domain/display';
 import { go, useRoute } from './app/useRoute';
 import { Shell } from './components/Shell';
 import { TodayPage } from './features/today/TodayPage';
@@ -25,6 +26,13 @@ const Loading = () => <p className="p-6 font-pixel text-xs text-muted-foreground
 export function App() {
   const route = useRoute();
   const settings = useSettingsRow();
+
+  // Display preferences live on the root element so every screen, and the CSS, sees them.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.toggleAttribute('data-calm', !!settings?.calm);
+    root.style.fontSize = `${textScale(settings?.textSize)}%`;
+  }, [settings?.calm, settings?.textSize]);
 
   if (settings === undefined) return <Loading />;
   // First run: the welcome flow renders in place until it is finished.

@@ -11,7 +11,11 @@ import {
   MAX_CHARACTER_NAME, cleanCharacterName, exportProgress, flushOutbox, importProgress, linkHeartBeat,
   parseBackup, saveSettings, unlinkHeartBeat, type ImportProblem,
 } from '../../db/repository';
+import { TEXT_SIZES, type TextSize } from '@/domain/display';
+import { useInstall } from '../useInstall';
 import { useSettings } from '../useApp';
+
+const SIZE_LABEL: Record<TextSize, string> = { default: 'Default', large: 'Large', larger: 'Larger' };
 
 const PROBLEM_TEXT: Record<ImportProblem, string> = {
   'not-json': 'That file is not readable. Pick a Lantern backup (.json).',
@@ -21,6 +25,7 @@ const PROBLEM_TEXT: Record<ImportProblem, string> = {
 
 export function MePage() {
   const settings = useSettings();
+  const install = useInstall();
   const pending = useLiveQuery(async () => {
     const rows = await db.outbox.toArray();
     return rows.filter((row) => row.sentAt === undefined && row.rejectedAt === undefined).length;
@@ -181,6 +186,41 @@ export function MePage() {
         />
         <p className="mt-3 text-sm text-muted-foreground">Days follow your timezone: {settings.timeZone}.</p>
       </Panel>
+
+      <Panel title="Display" id="display">
+        <div className="flex min-h-12 items-center justify-between gap-4">
+          <label htmlFor="me-calm">Calm mode (no motion)</label>
+          <Switch id="me-calm" checked={settings.calm} onCheckedChange={(on) => void saveSettings({ calm: on })} />
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">Stops the blinking cursor and the character's typing. Also on if your device asks to reduce motion.</p>
+        <p id="me-size-label" className={label}>Text size</p>
+        <div role="group" aria-labelledby="me-size-label" className="flex flex-wrap gap-2">
+          {TEXT_SIZES.map((size) => (
+            <Button
+              key={size}
+              type="button"
+              variant={settings.textSize === size ? 'default' : 'secondary'}
+              aria-pressed={settings.textSize === size}
+              className="h-12 min-w-fit flex-1"
+              onClick={() => void saveSettings({ textSize: size })}
+            >
+              {SIZE_LABEL[size]}
+            </Button>
+          ))}
+        </div>
+      </Panel>
+
+      {!install.installed && (
+        <Panel title="Install" id="install">
+          {install.canPrompt ? (
+            <Button type="button" className="h-12 w-full" onClick={() => void install.install()}>Install Lantern</Button>
+          ) : (
+            <p className="text-muted-foreground">
+              To install: on iPhone tap Share, then Add to Home Screen. On Android open the browser menu, then Install app.
+            </p>
+          )}
+        </Panel>
+      )}
 
       <Panel title="Backup" id="backup">
         <p className="text-muted-foreground">

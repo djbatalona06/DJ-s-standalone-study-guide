@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useSettings } from '@/features/useApp';
+import { isCalm } from '@/domain/display';
 import { PALETTE, SPRITES, SPRITE_SIZE, runs, type SpriteKey } from './sprites';
 
 interface Props {
@@ -13,13 +15,14 @@ const FRAME_MS = 480;
 
 export function Sprite({ frames, label, size = 96, className }: Props) {
   const [frame, setFrame] = useState(0);
+  const { calm } = useSettings();
 
   useEffect(() => {
     if (frames.length < 2) return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (isCalm(calm, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)) return;
     const timer = window.setInterval(() => setFrame((f) => (f + 1) % frames.length), FRAME_MS);
     return () => window.clearInterval(timer);
-  }, [frames.length]);
+  }, [frames.length, calm]);
 
   const sprite = SPRITES[frames[frame % frames.length]];
   return (
