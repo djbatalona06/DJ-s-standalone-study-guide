@@ -30,7 +30,7 @@ const cs50 = (n: number, title: string): Domain => ({
   trackId: 'cs50',
   code: `Week ${n}`,
   title,
-  weight: 1 / 6,
+  weight: 1 / 10,
   order: n,
   objectiveVersion: 'cs50x-2026',
 });
@@ -50,6 +50,10 @@ export const DOMAINS: Domain[] = [
   cs50(3, 'Algorithms'),
   cs50(4, 'Memory'),
   cs50(5, 'Data structures'),
+  cs50(6, 'Python'),
+  cs50(7, 'SQL'),
+  cs50(8, 'HTML, CSS and JavaScript'),
+  cs50(9, 'Flask and web applications'),
 
   a1(1, 'Mobile devices', 0.13),
   a1(2, 'Networking', 0.23),
