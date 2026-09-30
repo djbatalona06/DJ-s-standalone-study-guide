@@ -4,7 +4,7 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 ---
 
-**Project: Lantern (working title)** — standalone study PWA for CS50 / intro CS + web dev, CompTIA A+ Core 1 (220-1201) and Core 2 (220-1202). Career goal: help desk → sysadmin → cloud. Personal app; no accounts, no analytics, no backend of its own in v1.
+**Project: Lantern (working title)** — a TypeScript web app (React + Vite), installable as a PWA; standalone study app for CS50 / intro CS + web dev, CompTIA A+ Core 1 (220-1201) and Core 2 (220-1202). Career goal: help desk → sysadmin → cloud. Personal app; no accounts, no analytics, no backend of its own in v1.
 
 **Stack:** Vite + React + TypeScript PWA (vite-plugin-pwa), Dexie (IndexedDB), Vitest (`*.test.ts` only, domain code pure), Cloudflare Pages static hosting, npm. UI: Tailwind v4 + shadcn/ui + 8bitcn/ui (https://www.8bitcn.com/, copied into `src/components/ui/8bit/`), themed through HeartBeat's token names in `src/theme/palette.ts` + `styles.css` (dark "terminal" palette, amber XP; `contrast.test.ts` guards AA). Fonts: Press Start 2P for titles/numbers/buttons, Outfit for reading. Original art only: the character is a 16×16 text-grid sprite (`src/art/sprites.ts`), **named by the learner** (`settings.characterName`), with stages Foundations → Help desk → Specialize → Sysadmin → Cloud.
 
@@ -22,7 +22,7 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **Local tables:** cardState, reviewLog, quizAnswers, sessions (id = XP sessionId), mastery, pathProgress, userCards, syncQueue, settings (studyToken never exported), meta. Import merge: greater `lastReviewedAt` wins per card; logs union by id; never import the token.
 
-**UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Explore, Label and list view built, Match next. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
+**UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Explore, Label and list view built, Match next. Flashcards mode (`/flashcards/:deck`, Quizlet layout, not graded) with a required written `hint` on every card. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
 
 **Licensing:** original content only; CompTIA objectives as outline not text; never copy exam-dump questions; CS50 is CC BY-NC-SA 4.0 so write your own cards and link out; every card has `provenance`.
 

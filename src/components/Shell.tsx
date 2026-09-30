@@ -14,7 +14,7 @@ const TABS = [
  * links, so the browser's own back button and middle-click work.
  */
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
-  const current = route.name === 'diagram' ? 'learn' : route.name;
+  const current = route.name === 'diagram' || route.name === 'flashcards' ? 'learn' : route.name;
   return (
     <div className="min-h-dvh min-[900px]:grid min-[900px]:grid-cols-[220px_1fr]">
       <nav

@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { go, useRoute } from './app/useRoute';
 import { Shell } from './components/Shell';
+import { FlashcardsPage } from './features/flashcards/FlashcardsPage';
 import { LearnPage } from './features/learn/LearnPage';
 import { MePage } from './features/me/MePage';
 import { ReviewSession } from './features/review/ReviewSession';
@@ -35,6 +36,7 @@ export function App() {
       {route.name === 'today' && <TodayPage />}
       {route.name === 'learn' && <LearnPage />}
       {route.name === 'me' && <MePage />}
+      {route.name === 'flashcards' && <FlashcardsPage key={route.deck} deckId={route.deck} />}
       {route.name === 'diagram' && (
         <Suspense fallback={<Loading />}>
           <DiagramPage id={route.id} />

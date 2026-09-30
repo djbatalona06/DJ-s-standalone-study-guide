@@ -36,6 +36,7 @@
 | Component | Notes |
 |---|---|
 | Card | Front/back, flip by tap or Space; image slot above text; domain chip; "sources" foot link. |
+| Flashcard (Quizlet layout) | Big card that flips in 3D; term on the front with **Get a hint**, definition and "why" on the back; ← → and a Shuffle toggle below; "Terms in this set" list underneath. The hidden face is `aria-hidden`. |
 | Grade bar | Four buttons (Again/Hard/Good/Easy) with the next-interval preview ("10 min", "3 d"). Thumb-reachable, fixed at bottom. |
 | Domain ring | Mastery as a ring **plus a number** (never color alone). |
 | Diagram viewer | Pinch/zoom, pan; parts are buttons with focus ring; part label appears on focus/hover/tap. |

@@ -4,7 +4,7 @@
 
 | Concern | Choice | Why |
 |---|---|---|
-| App | Vite + React + TypeScript, installable PWA | Same as HeartBeat, so its patterns and `docs/design-system.md` carry over. |
+| App | **TypeScript web app**: Vite + React + TypeScript, installable PWA. `index.html` is only the shell; all app code is `.ts`/`.tsx`. | Same as HeartBeat, so its patterns and `docs/design-system.md` carry over. |
 | Local data | Dexie (IndexedDB) | Proven in HeartBeat; live queries drive re-renders. |
 | Scheduler | SM-2 ported from `app/src/domain/study/srs.ts` | Already tested; keep its behavior (ease starts 2.5, floor 1.3, ceiling 3; "again" = quality 2, brings the card back today and dents ease rather than resetting it). |
 | Diagrams | Hand-authored SVG fragments in a registry, one lazy chunk per diagram | Original art only (see 6). Matches `features/party/art/house/index.tsx`. |

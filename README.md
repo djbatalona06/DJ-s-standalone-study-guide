@@ -1,8 +1,10 @@
 # DJ-s-standalone-study-guide
 
-HTML5 only with an XP gate/sync to the Heartbeat PWA iOS app.
-
-The app is called Lantern for now (working title).
+**Lantern** (working title) is a **TypeScript web app**: React + TypeScript, built with Vite, and
+installable on a phone as a PWA (progressive web app). It is not a plain HTML5 site. `index.html` is
+only the shell the browser loads; every screen is TypeScript (`.ts`/`.tsx`) compiled into
+JavaScript by `npm run build`. It runs in any modern browser, needs no app store, and earns XP
+in the HeartBeat PWA through HeartBeat's study-token bridge.
 
 A study app for CS50 / intro CS and CompTIA A+ (Core 1 `220-1201`, Core 2 `220-1202`),
 built to send XP to [HeartBeat](https://heartbeat-eop.pages.dev) through the study-token
@@ -16,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 132 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
+npm test           # 141 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -45,6 +47,11 @@ npm run build
 - **Your character:** a 16×16 pixel hacker (`src/art/sprites.ts`) who works his way from
   help desk to cloud. You name him when you first open the app.
 - **Onboarding, hash routes, a streak, and the next interval shown on every grade button.**
+- **Flashcards mode (Quizlet-style):** one big card that flips, ← → arrows, a counter,
+  shuffle, and every term listed underneath. **Get a hint** (or `H`) shows a hand-written nudge
+  before you flip; every card has one, and the validator rejects a hint that contains the answer.
+  Open it from any track or domain in Learn, or from the motherboard. Browsing is not graded;
+  Review is where cards get scheduled.
 - **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
   then check), and a list view (`L`). Fully keyboard-operable. 15 new A+ Core 1 cards.
 - **Installable and offline:** a service worker precaches the app; diagram art is cached

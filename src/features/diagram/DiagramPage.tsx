@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { Check, List, Minus, Plus, X } from 'lucide-react';
+import { Check, Layers, List, Minus, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/8bit/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/8bit/sheet';
 import { PageHead } from '@/components/Shell';
@@ -199,6 +199,11 @@ function Viewer({ diagram }: { diagram: Diagram }) {
           onClick={() => setListView((v) => !v)}
         >
           <List aria-hidden="true" /> List
+        </Button>
+        <Button asChild variant="secondary" className="h-12 px-4">
+          <a href={href({ name: 'flashcards', deck: diagram.id })}>
+            <Layers aria-hidden="true" /> Flashcards
+          </a>
         </Button>
       </div>
 

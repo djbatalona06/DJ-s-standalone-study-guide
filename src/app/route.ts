@@ -11,7 +11,8 @@ export type Route =
   | { name: 'me' }
   | { name: 'welcome' }
   | { name: 'review'; track: TrackId }
-  | { name: 'diagram'; id: string };
+  | { name: 'diagram'; id: string }
+  | { name: 'flashcards'; deck: string };
 
 const TRACK_IDS: readonly string[] = ['cs50', 'a1', 'a2'];
 
@@ -26,6 +27,8 @@ export function parseRoute(hash: string): Route {
       return arg && TRACK_IDS.includes(arg) ? { name: 'review', track: arg as TrackId } : { name: 'today' };
     case 'diagram':
       return arg ? { name: 'diagram', id: decodeURIComponent(arg) } : { name: 'learn' };
+    case 'flashcards':
+      return arg ? { name: 'flashcards', deck: decodeURIComponent(arg) } : { name: 'learn' };
     default: return { name: 'today' };
   }
 }
@@ -35,6 +38,7 @@ export function href(route: Route): string {
     case 'today': return '#/';
     case 'review': return `#/review/${route.track}`;
     case 'diagram': return `#/diagram/${encodeURIComponent(route.id)}`;
+    case 'flashcards': return `#/flashcards/${encodeURIComponent(route.deck)}`;
     default: return `#/${route.name}`;
   }
 }

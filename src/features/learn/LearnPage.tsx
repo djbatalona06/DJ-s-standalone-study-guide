@@ -1,4 +1,4 @@
-import { Cpu } from 'lucide-react';
+import { Cpu, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/8bit/button';
 import { Progress } from '@/components/ui/8bit/progress';
 import { PageHead } from '@/components/Shell';
@@ -51,6 +51,14 @@ export function LearnPage() {
                     {cards.length > 0 ? (
                       <Progress variant="retro" value={pct} className="mt-3 h-2" aria-label={`${domain.title} mastery ${pct}%`} />
                     ) : null}
+                    {cards.length > 0 ? (
+                      <a
+                        href={href({ name: 'flashcards', deck: domain.id })}
+                        className="mt-3 mr-6 inline-flex min-h-12 items-center gap-2 text-(--color-accent) underline-offset-4 hover:underline"
+                      >
+                        <Layers aria-hidden="true" className="size-4" /> Flashcards ({cards.length})
+                      </a>
+                    ) : null}
                     {diagramsOf(domain.id).map((diagram) => (
                       <a
                         key={diagram.id}
@@ -65,9 +73,14 @@ export function LearnPage() {
               })}
             </ul>
             {hasCards ? (
-              <Button className="mt-2 h-12 w-full" onClick={() => go({ name: 'review', track: track.id })}>
-                Review {track.title}
-              </Button>
+              <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                <Button className="h-12" onClick={() => go({ name: 'review', track: track.id })}>
+                  Review {track.title}
+                </Button>
+                <Button asChild variant="secondary" className="h-12">
+                  <a href={href({ name: 'flashcards', deck: track.id })}>Flashcards</a>
+                </Button>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Cards are on their way. Verify the weights against CompTIA's official objectives before
