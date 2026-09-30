@@ -1,0 +1,18 @@
+# Cloudflare Pages reads this file. Strict CSP: the study token lives in IndexedDB,
+# so scripts run only from this origin and requests go only to HeartBeat.
+# Using a different HeartBeat address in Me? Add it to connect-src below.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://heartbeat-eop.pages.dev; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Hashed files never change, so cache them for a year.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The service worker and shell must revalidate, or updates never arrive.
+/sw.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
