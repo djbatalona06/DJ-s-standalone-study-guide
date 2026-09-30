@@ -1,19 +1,51 @@
-# DJ-s-standalone-study-guide
+# Lantern
 
-**Lantern** (working title) is a **TypeScript web app**: React + TypeScript, built with Vite, and
-installable on a phone as a PWA (progressive web app). It is not a plain HTML5 site. `index.html` is
-only the shell the browser loads; every screen is TypeScript (`.ts`/`.tsx`) compiled into
-JavaScript by `npm run build`. It runs in any modern browser, needs no app store, and earns XP
-in the HeartBeat PWA through HeartBeat's study-token bridge.
+Spaced-repetition study app for **CS50 / intro CS** and **CompTIA A+** (Core 1 `220-1201`, Core 2 `220-1202`),
+with practice exams, interactive hardware diagrams, a career path and a pixel hacker who levels up as you study.
+It works offline, needs no account, and keeps your progress on your own device.
 
-A study app for CS50 / intro CS and CompTIA A+ (Core 1 `220-1201`, Core 2 `220-1202`),
-built to send XP to [HeartBeat](https://heartbeat-eop.pages.dev) through the study-token
-bridge HeartBeat already has. Progress lives on the device; there is no backend of its own.
+### **[Open Lantern](https://lantern.batalona06.workers.dev/)**
 
-The plan lives in `docs/` (PRD, TRD, App Flow, UI/UX, Backend Schema, Implementation Plan,
-and a context block). Treat those as the source of truth.
+## Install it on your phone (30 seconds)
 
-## Run local host 
+1. Open **https://lantern.batalona06.workers.dev/** in your phone's browser (Safari on iPhone, Chrome on Android).
+2. **iPhone:** Share button, then **Add to Home Screen**. **Android:** menu, then **Install app**.
+3. Open Lantern from your Home Screen. Name your character and start with **Today**.
+
+### Getting new versions
+When a new version is published, the installed app downloads it in the background and shows a
+**"A new version of Lantern is ready" bar with a Reload button** on the main screens. It never
+interrupts a review, quiz or exam. Your progress is stored on the device, so updating never erases it.
+If you ever see no bar after a release, close the app fully (swipe it away) and open it again.
+
+## The pages
+
+Every screen has its own link, so you can bookmark or share one.
+
+| Page | What it is | Link |
+|---|---|---|
+| Today | Your daily review, streak and character | [https://lantern.batalona06.workers.dev/#/](https://lantern.batalona06.workers.dev/#/) |
+| Learn | Every track and domain: flashcards, quizzes, exams, diagrams | [#/learn](https://lantern.batalona06.workers.dev/#/learn) |
+| Path | The 17-step career path, help desk to cloud | [#/path](https://lantern.batalona06.workers.dev/#/path) |
+| Me | Name, new cards per day, backup, HeartBeat link | [#/me](https://lantern.batalona06.workers.dev/#/me) |
+| Review | Graded spaced-repetition session (CS50 / A+ Core 1 / A+ Core 2) | [#/review/a1](https://lantern.batalona06.workers.dev/#/review/a1) |
+| Flashcards | Quizlet-style flip cards with hints, per track or domain | [#/flashcards/a1](https://lantern.batalona06.workers.dev/#/flashcards/a1) |
+| Quick quiz | 10 questions for a track or domain | [#/quiz/a2](https://lantern.batalona06.workers.dev/#/quiz/a2) |
+| Practice exam | Timed exam per track | [#/exam/a1](https://lantern.batalona06.workers.dev/#/exam/a1) |
+| Diagrams | Motherboard and ten more: Explore, Label, Match | [#/diagram/motherboard](https://lantern.batalona06.workers.dev/#/diagram/motherboard) |
+
+Track ids: `cs50`, `a1` (Core 1), `a2` (Core 2). Diagram ids: `motherboard`, `ram-modules`, `storage`, `psu`,
+`laser-printer`, `osi`, `topologies`, `ports`, `cables`, `cpu-cooling`, `laptop`.
+
+**Build your own plan:** the six project docs (PRD, TRD, App Flow, UI/UX, Schema, Implementation Plan) plus a
+context block are in [`docs/`](docs/). Treat them as the source of truth.
+
+**Notes:** [`NOTICE.md`](NOTICE.md) covers licences and credits.
+
+## For developers
+
+Lantern is a TypeScript web app: React + Vite, installable as a PWA. `index.html` is only the shell; every
+screen is `.ts`/`.tsx` compiled by `npm run build`.
 
 ```bash
 npm install
@@ -27,25 +59,19 @@ npm run e2e        # browser test of the built app (needs `npx playwright instal
 The same checks run on every pull request and push to `main` in GitHub Actions
 (`.github/workflows/ci.yml`); a red check means one of them failed.
 
-## Put it on your phone (Cloudflare Pages)
-
-Localhost only works on the computer running it, and a phone needs HTTPS to install a PWA.
-Cloudflare Pages gives you both, free, and rebuilds on every push to `main`.
-
-Most of users should skip to step 4 for adding the app to your home screen
-
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**, pick this repo.
-2. Build command `npm run build`, output directory `dist`. (`.node-version` pins Node 22.)
-3. Save and deploy. You get `https://<project>.pages.dev`.
-4. On your phone open that URL, then browser menu → **Add to Home Screen**.
-5. In HeartBeat Settings connect a study app, paste the token in Lantern's Me screen, finish 5+ cards,
-   and check HeartBeat shows one credit.
-
-
+### Deploy (Cloudflare)
+`wrangler.jsonc` serves the built `dist/` folder as static assets, and Cloudflare rebuilds on every push to
+`main`. Build command `npm run build`, output `dist`, Node 22 (`.node-version`). A phone needs HTTPS to install a
+PWA, which `*.workers.dev` provides.
 
 `public/_headers` ships a strict Content-Security-Policy: scripts only from this origin, requests only
 to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address in Me, add it to
-`connect-src` in that file, or syncing will quietly stay queued.
+`connect-src` in that file, or syncing will quietly stay queued. It also makes `sw.js` and `index.html`
+revalidate, which is what lets updates arrive.
+
+### Earning XP in HeartBeat
+In the HeartBeat PWA open Settings and connect a study app, then paste the token in Lantern's Me screen and
+finish 5+ cards. HeartBeat shows one credit.
 
 ## What exists (Phase 1)
 
@@ -150,7 +176,7 @@ Good first changes if you want to learn the codebase:
 - **Tune a colour** in `src/theme/palette.ts` and `src/styles.css`. `contrast.test.ts` fails if
   it stops being readable.
 
-## Linking to HeartBeat
+## Linking to HeartBeat (details)
 
 In HeartBeat, open Settings and connect a study app. It shows a token once. Paste it in
 Lantern's Me screen. The token is stored on this device only and is sent only to the
