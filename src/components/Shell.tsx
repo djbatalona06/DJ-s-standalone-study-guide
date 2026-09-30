@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { BookOpen, Milestone, Terminal, User } from 'lucide-react';
 import { href, type Route } from '@/app/route';
 import { cn } from '@/lib/utils';
+import { UpdateBanner } from './UpdateBanner';
 
 const TABS = [
   { route: { name: 'today' }, label: 'Today', Icon: Terminal },
@@ -18,6 +19,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const current = route.name === 'diagram' || route.name === 'flashcards' ? 'learn' : route.name === 'node' ? 'path' : route.name;
   return (
     <div className="min-h-dvh min-[900px]:grid min-[900px]:grid-cols-[220px_1fr]">
+      <UpdateBanner />
       <nav
         aria-label="Sections"
         className={cn(
