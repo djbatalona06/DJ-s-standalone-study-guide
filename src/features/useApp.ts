@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type SettingsRow } from '../db/database';
-import { defaultSettings } from '../db/repository';
+import type { TrackId } from '../content/types';
+import { defaultSettings, loadAnswerRows, recentExamScores } from '../db/repository';
+import { quizAccuracy } from '../domain/mastery/quiz';
 import { todayKey } from '../domain/day';
 import type { CardState } from '../domain/srs/srs';
 
@@ -48,4 +50,14 @@ export function useStates(): Map<string, CardState> | undefined {
     const rows = await db.cardState.toArray();
     return new Map(rows.map((row) => [row.cardId, row]));
   }, []);
+}
+
+/** Recent quiz accuracy per domain, blended into mastery. `undefined` while it loads. */
+export function useQuizAccuracy(): Map<string, number> | undefined {
+  return useLiveQuery(async () => quizAccuracy(await loadAnswerRows()), []);
+}
+
+/** The latest two finished practice exams for a track (0–1, newest first). */
+export function useRecentExams(trackId: TrackId): number[] | undefined {
+  return useLiveQuery(() => recentExamScores(trackId, 2), [trackId]);
 }

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { CARDS, DOMAINS, TRACKS, cardsOfTrack, deckById, domainsOf } from './index';
-import { validateContent, validateDiagram } from './validate';
+import { validateContent, validateDiagram, validateQuestions } from './validate';
+import { TRACKS_WITH_QUESTIONS, loadBank } from './questions';
+import type { Question } from './types';
 import { DIAGRAMS, DIAGRAM_ART } from './diagrams';
 import { CS50_CARDS } from './cs50';
 import type { Card } from './types';
@@ -127,5 +129,60 @@ describe('deckById', () => {
 
   it('is undefined for anything else', () => {
     expect(deckById('nope', diagrams)).toBeUndefined();
+  });
+});
+
+describe('the shipped questions', () => {
+  it('are valid, and every track that says it has a bank has one', async () => {
+    for (const track of TRACKS) {
+      const bank = await loadBank(track.id);
+      expect(bank.length > 0).toBe(TRACKS_WITH_QUESTIONS.includes(track.id));
+      expect(validateQuestions(DOMAINS, CARDS, bank)).toEqual([]);
+    }
+  });
+
+  it('cover every Core 1 domain with several questions, and use every question type', async () => {
+    const bank = await loadBank('a1');
+    for (const domain of domainsOf('a1')) {
+      expect(bank.filter((q) => q.domainId === domain.id).length).toBeGreaterThanOrEqual(8);
+    }
+    for (const type of ['mcq', 'multi', 'order', 'match']) expect(bank.some((q) => q.type === type)).toBe(true);
+  });
+
+  it('never repeat an id across banks', async () => {
+    const ids = (await Promise.all(TRACKS.map((t) => loadBank(t.id)))).flat().map((q) => q.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('validateQuestions', () => {
+  const ok: Question = {
+    id: 'q-a1-d1-x', domainId: 'a1-d1', type: 'mcq', prompt: 'p', choices: ['a', 'b'], answer: 0,
+    explanation: 'why', provenance: 'original',
+  };
+  const check = (q: Question) => validateQuestions(DOMAINS, CARDS, [q]);
+
+  it('accepts a good question', () => {
+    expect(check(ok)).toEqual([]);
+  });
+
+  it('catches an answer key that points nowhere, repeated choices, blanks and orphans', () => {
+    expect(check({ ...ok, answer: 5 }).join()).toContain('outside its choices');
+    expect(check({ ...ok, choices: ['a', 'a'] }).join()).toContain('repeated choices');
+    expect(check({ ...ok, explanation: ' ' }).join()).toContain('no explanation');
+    expect(check({ ...ok, domainId: 'nope' }).join()).toContain('unknown domain');
+    expect(check({ ...ok, cardId: 'missing' }).join()).toContain('missing card');
+    expect(validateQuestions(DOMAINS, CARDS, [ok, ok]).join()).toContain('duplicate question id');
+  });
+
+  it('checks each type’s own shape', () => {
+    const multi: Question = { ...ok, type: 'multi', choices: ['a', 'b', 'c'], answers: [0, 1] } as Question;
+    expect(check(multi)).toEqual([]);
+    expect(check({ ...multi, answers: [0, 0] } as Question).join()).toContain('bad answer key');
+    expect(check({ ...multi, answers: [0, 1, 2] } as Question).join()).toContain('at least one wrong');
+    expect(check({ ...multi, answers: [0] } as Question).join()).toContain('at least two right');
+    expect(check({ ...ok, type: 'order', items: ['a', 'b'] } as unknown as Question).join()).toContain('fewer than three');
+    const match = { ...ok, type: 'match', pairs: [{ term: 'a', definition: '1' }, { term: 'a', definition: '2' }, { term: 'c', definition: '3' }] };
+    expect(check(match as unknown as Question).join()).toContain('repeated terms');
   });
 });

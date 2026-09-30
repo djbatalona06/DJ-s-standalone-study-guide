@@ -2,7 +2,7 @@ import Dexie, { type Table } from 'dexie';
 import type { CardState, Grade } from '../domain/srs/srs';
 import type { OutboxEntry } from '../domain/xp/outbox';
 import type { SessionMode } from '../domain/xp/kinds';
-import type { TrackId } from '../content/types';
+import type { Answer, TrackId } from '../content/types';
 
 /**
  * Progress only. Content lives in the bundle, so a content update never
@@ -16,6 +16,38 @@ export interface ReviewLogRow {
   sessionId: string;
   prevInterval: number;
   nextInterval: number;
+}
+
+/** One answered practice or exam question. Blanks are not rows: they were never attempted. */
+export interface QuizAnswerRow {
+  id: string;
+  questionId: string;
+  domainId: string;
+  correct: boolean;
+  at: number;
+  sessionId: string;
+}
+
+/**
+ * A practice exam, from the first question to the score. Saved on every change
+ * so a reload resumes it. `id` is the session id, which is also the XP `sessionId`.
+ */
+export interface ExamRow {
+  id: string;
+  trackId: TrackId;
+  /** In the order they are shown. */
+  questionIds: string[];
+  answers: Record<string, Answer>;
+  flagged: string[];
+  index: number;
+  /** Saved whenever the clock pauses or an answer is given; never counts hidden time. */
+  remainingMs: number;
+  totalMs: number;
+  status: 'active' | 'done';
+  startedAt: number;
+  finishedAt?: number;
+  correct?: number;
+  total: number;
 }
 
 export interface SessionRow {
@@ -58,6 +90,8 @@ export class LanternDB extends Dexie {
   sessions!: Table<SessionRow, string>;
   outbox!: Table<OutboxEntry, string>;
   settings!: Table<SettingsRow, string>;
+  quizAnswers!: Table<QuizAnswerRow, string>;
+  exams!: Table<ExamRow, string>;
 
   constructor(name = 'lantern') {
     super(name);
@@ -67,6 +101,11 @@ export class LanternDB extends Dexie {
       sessions: 'id, endedAt, dayKey',
       outbox: 'sessionId, nextAttemptAt',
       settings: 'id',
+    });
+    // Quizzes and exams. Only the new tables are listed; the rest carry over.
+    this.version(2).stores({
+      quizAnswers: 'id, questionId, domainId, at, sessionId',
+      exams: 'id, trackId, status',
     });
   }
 }

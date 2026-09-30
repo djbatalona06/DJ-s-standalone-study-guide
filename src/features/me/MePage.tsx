@@ -61,7 +61,7 @@ export function MePage() {
       return;
     }
     const s = await importProgress(parsed.file);
-    setNote(`Imported: ${s.cardsAdded} new cards, ${s.cardsUpdated} updated, ${s.reviewsAdded} reviews, ${s.sessionsAdded} sessions.`);
+    setNote(`Imported: ${s.cardsAdded} new cards, ${s.cardsUpdated} updated, ${s.reviewsAdded} reviews, ${s.sessionsAdded} sessions, ${s.answersAdded} quiz answers, ${s.examsAdded} exams.`);
     if (fileInput.current) fileInput.current.value = '';
   }
 

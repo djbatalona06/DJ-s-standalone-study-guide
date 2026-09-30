@@ -1,5 +1,5 @@
 import type { Diagram, DiagramArt } from './diagrams/types';
-import type { Card, Domain, Track } from './types';
+import type { Card, Domain, Question, Track } from './types';
 
 const PROVENANCE = new Set(['original', 'objective-outline', 'cs50-derived']);
 
@@ -78,6 +78,53 @@ export function validateDiagram(diagram: Diagram, cards: Card[], art?: DiagramAr
       if (r.x < 0 || r.y < 0 || r.x + r.w > 100 || r.y + r.h > 100) {
         problems.push(`part ${diagram.id}/${id} sits outside the 100x100 space`);
       }
+    }
+  }
+  return problems;
+}
+
+const unique = (items: readonly string[]) => new Set(items.map((x) => x.trim())).size === items.length;
+
+/**
+ * Everything that must be true of a question bank before it ships. Like the card
+ * check, it runs in the tests, so a broken answer key fails the build instead of
+ * teaching somebody the wrong thing.
+ */
+export function validateQuestions(domains: Domain[], cards: Card[], questions: Question[]): string[] {
+  const problems: string[] = [];
+  const domainIds = new Set(domains.map((d) => d.id));
+  const cardIds = new Set(cards.map((c) => c.id));
+  const seen = new Set<string>();
+
+  for (const q of questions) {
+    const at = `question ${q.id}`;
+    if (seen.has(q.id)) problems.push(`duplicate question id: ${q.id}`);
+    seen.add(q.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(q.id)) problems.push(`${at} is not a stable slug`);
+    if (!domainIds.has(q.domainId)) problems.push(`${at} names an unknown domain`);
+    if (!q.prompt.trim()) problems.push(`${at} has no prompt`);
+    if (!q.explanation.trim()) problems.push(`${at} has no explanation`);
+    if (!PROVENANCE.has(q.provenance)) problems.push(`${at} has no provenance`);
+    if (q.cardId && !cardIds.has(q.cardId)) problems.push(`${at} names a missing card ${q.cardId}`);
+
+    if (q.type === 'mcq') {
+      if (q.choices.length < 2) problems.push(`${at} has fewer than two choices`);
+      if (!unique(q.choices) || q.choices.some((c) => !c.trim())) problems.push(`${at} has blank or repeated choices`);
+      if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.choices.length) problems.push(`${at} has an answer outside its choices`);
+    } else if (q.type === 'multi') {
+      if (!unique(q.choices) || q.choices.some((c) => !c.trim())) problems.push(`${at} has blank or repeated choices`);
+      const ok = q.answers.every((a) => Number.isInteger(a) && a >= 0 && a < q.choices.length);
+      if (!ok || new Set(q.answers).size !== q.answers.length) problems.push(`${at} has a bad answer key`);
+      if (q.answers.length < 2 || q.answers.length >= q.choices.length) problems.push(`${at} must have at least two right answers and at least one wrong one`);
+    } else if (q.type === 'order') {
+      if (q.items.length < 3) problems.push(`${at} has fewer than three items to order`);
+      if (!unique(q.items) || q.items.some((i) => !i.trim())) problems.push(`${at} has blank or repeated items`);
+    } else if (q.type === 'match') {
+      if (q.pairs.length < 3) problems.push(`${at} has fewer than three pairs`);
+      if (!unique(q.pairs.map((p) => p.term)) || !unique(q.pairs.map((p) => p.definition))) problems.push(`${at} has repeated terms or definitions`);
+      if (q.pairs.some((p) => !p.term.trim() || !p.definition.trim())) problems.push(`${at} has a blank term or definition`);
+    } else {
+      problems.push(`${at} has an unknown type`);
     }
   }
   return problems;
