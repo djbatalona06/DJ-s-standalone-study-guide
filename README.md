@@ -28,6 +28,7 @@ Every screen has its own link, so you can bookmark or share one.
 | Learn | Every track and domain: flashcards, quizzes, exams, diagrams | [#/learn](https://lantern.batalona06.workers.dev/#/learn) |
 | Path | The 17-step career path, help desk to cloud | [#/path](https://lantern.batalona06.workers.dev/#/path) |
 | Me | Name, new cards per day, backup, HeartBeat link | [#/me](https://lantern.batalona06.workers.dev/#/me) |
+| Study | Teach-then-test round: new cards shown once, then you type every answer | [#/study/a1](https://lantern.batalona06.workers.dev/#/study/a1) |
 | Review | Graded spaced-repetition session (CS50 / A+ Core 1 / A+ Core 2) | [#/review/a1](https://lantern.batalona06.workers.dev/#/review/a1) |
 | Flashcards | Quizlet-style flip cards with hints, per track or domain | [#/flashcards/a1](https://lantern.batalona06.workers.dev/#/flashcards/a1) |
 | Quick quiz | 10 questions for a track or domain | [#/quiz/a2](https://lantern.batalona06.workers.dev/#/quiz/a2) |

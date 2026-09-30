@@ -162,6 +162,26 @@ async function answerAny(page) {
   await context.close();
 }
 
+// ------------------------------------------------------ study mode (teach, then type)
+{
+  const { page, context } = await learner();
+  await page.goto(U + '#/learn'); await page.getByRole('button', { name: /^Study A\+ Core 1/ }).click();
+  await page.waitForSelector('text=New card: answer');
+  ok(await page.locator('#recall-input').count() === 0, 'a new card is shown before you are asked for it');
+  let rounds = 0;
+  while (rounds < 40 && !(await page.getByText('Session done').count())) {
+    if (await page.getByRole('button', { name: /Now type it/ }).count()) await page.keyboard.press('Space');
+    await page.locator('#recall-input').fill('a guess'); await page.keyboard.press('Enter');
+    await page.waitForSelector('[role=status]:has-text("Suggested:")');
+    await page.keyboard.press('3'); rounds += 1;
+    await page.waitForFunction(() => document.querySelector('#recall-input') || /Now type it|Session done/.test(document.body.innerText));
+  }
+  ok(/Session done/.test(await text(page)), `a study round finishes (${rounds} answers)`);
+  const saved = await page.evaluate(() => new Promise((r) => { const o = indexedDB.open('lantern'); o.onsuccess = () => { const t = o.result.transaction(['sessions', 'outbox']); const a = t.objectStore('sessions').getAll(); const b = t.objectStore('outbox').getAll(); t.oncomplete = () => r({ modes: a.result.map((x) => x.mode), kinds: b.result.map((x) => x.kind) }); }; }));
+  ok(saved.modes.includes('study') && saved.kinds.includes('deck'), `the round is saved as a study session, reported to HeartBeat as a deck (${JSON.stringify(saved)})`);
+  await context.close();
+}
+
 // ------------------------------------------------------------------- axe
 for (const scheme of ['light', 'dark']) {
   const { page, context } = await learner({ scheme, bypassCSP: true });

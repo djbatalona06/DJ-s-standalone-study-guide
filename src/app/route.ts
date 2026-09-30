@@ -13,6 +13,7 @@ export type Route =
   | { name: 'node'; id: string }
   | { name: 'welcome' }
   | { name: 'review'; track: TrackId }
+  | { name: 'study'; track: TrackId }
   | { name: 'quiz'; scope: string }
   | { name: 'exam'; track: TrackId }
   | { name: 'diagram'; id: string }
@@ -30,6 +31,8 @@ export function parseRoute(hash: string): Route {
     case 'welcome': return { name: 'welcome' };
     case 'review':
       return arg && TRACK_IDS.includes(arg) ? { name: 'review', track: arg as TrackId } : { name: 'today' };
+    case 'study':
+      return arg && TRACK_IDS.includes(arg) ? { name: 'study', track: arg as TrackId } : { name: 'today' };
     case 'quiz':
       return arg ? { name: 'quiz', scope: decodeURIComponent(arg) } : { name: 'learn' };
     case 'exam':
@@ -47,6 +50,7 @@ export function href(route: Route): string {
     case 'today': return '#/';
     case 'review': return `#/review/${route.track}`;
     case 'node': return `#/path/${encodeURIComponent(route.id)}`;
+    case 'study': return `#/study/${route.track}`;
     case 'quiz': return `#/quiz/${encodeURIComponent(route.scope)}`;
     case 'exam': return `#/exam/${route.track}`;
     case 'diagram': return `#/diagram/${encodeURIComponent(route.id)}`;

@@ -102,7 +102,10 @@ export function LearnPage() {
             ) : null}
             {hasCards ? (
               <div className="mt-2 grid gap-4 sm:grid-cols-2">
-                <Button className="h-12" onClick={() => go({ name: 'review', track: track.id })}>
+                <Button className="h-12" onClick={() => go({ name: 'study', track: track.id })}>
+                  Study {track.title}
+                </Button>
+                <Button variant="secondary" className="h-12" onClick={() => go({ name: 'review', track: track.id })}>
                   Review {track.title}
                 </Button>
                 <Button asChild variant="secondary" className="h-12">
