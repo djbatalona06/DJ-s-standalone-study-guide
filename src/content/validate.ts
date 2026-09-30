@@ -32,6 +32,10 @@ export function validateContent(tracks: Track[], domains: Domain[], cards: Card[
     if (!domainIds.has(card.domainId)) problems.push(`card ${card.id} names an unknown domain`);
     if (!card.front.trim() || !card.back.trim()) problems.push(`card ${card.id} has an empty side`);
     if (!card.why.trim()) problems.push(`card ${card.id} has no explanation`);
+    if (!card.hint?.trim()) problems.push(`card ${card.id} has no hint`);
+    else if (card.back.trim() && card.hint.includes(card.back.trim())) {
+      problems.push(`card ${card.id} has a hint that gives the answer away`);
+    }
     if (!PROVENANCE.has(card.provenance)) problems.push(`card ${card.id} has no provenance`);
     if (card.provenance === 'cs50-derived' && !card.sourceUrl) {
       problems.push(`card ${card.id} is derived from CS50 but names no source`);
