@@ -71,7 +71,7 @@ install).
 
 ## Left for later
 
-- Match mode (term to part). Label already earns the `match` kind.
+- ~~Match mode (term to part).~~ Done: instant per-pair checking, queues `match` like Label.
 - More diagrams (RAM keying next), then the rest of Core 1.
 - Help desk, Sysadmin and Cloud sprites.
 - The shadcn CLI could not reach `ui.shadcn.com` or `8bitcn.com` from the
