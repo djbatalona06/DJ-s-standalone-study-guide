@@ -158,6 +158,14 @@ for (const scheme of ['light', 'dark']) {
   for (const route of ['#/', '#/learn', '#/path', '#/path/role-help-desk', '#/me', '#/diagram/motherboard', '#/diagram/topologies', '#/flashcards/a1-d3']) {
     await page.goto(U + route); await page.waitForTimeout(500); await audit(route);
   }
+  // Calm mode and the largest text size: the settings apply, nothing overflows, axe stays clean.
+  await page.goto(U + '#/me'); await page.waitForSelector('#me-calm');
+  await page.locator('#me-calm').click();
+  await page.getByRole('button', { name: 'Larger', exact: true }).click();
+  await page.waitForTimeout(300);
+  ok(await page.evaluate(() => document.documentElement.hasAttribute('data-calm') && document.documentElement.style.fontSize === '125%'), `calm and larger text apply to the page (${scheme})`);
+  ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `no sideways scroll at larger text (${scheme})`);
+  await audit('#/me calm + larger text');
   await page.goto(U + '#/learn'); await page.goto(U + '#/quiz/a1-d2'); await page.waitForSelector('text=Check answer'); await audit('a quiz question');
   await page.goto(U + '#/exam/a1'); await page.waitForSelector('text=Start exam'); await audit('the exam intro');
   await context.close();

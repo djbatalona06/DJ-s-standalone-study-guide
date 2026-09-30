@@ -40,7 +40,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
               href={href(tab)}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex min-h-12 min-w-20 flex-col items-center justify-center gap-1 px-3 font-pixel text-[0.625rem] uppercase',
+                'flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-3 font-pixel text-[0.625rem] uppercase',
                 'text-muted-foreground no-underline hover:text-foreground',
                 'min-[900px]:flex-row min-[900px]:justify-start min-[900px]:gap-3 min-[900px]:text-xs',
                 active && 'bg-secondary text-foreground',

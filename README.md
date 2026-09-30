@@ -159,8 +159,7 @@ finish 5+ cards. HeartBeat shows one credit.
 
 ## What is not built yet
 
-CS50 quizzes, calm mode, an install
-prompt, and a person's screen-reader walk of every screen. See `docs/06-Implementation-Plan.md`.
+CS50 quizzes and a person's screen-reader walk of every screen. Calm mode, text size and an install row are in Me. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
 

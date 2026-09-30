@@ -4,6 +4,7 @@ import type { OutboxEntry } from '../domain/xp/outbox';
 import type { SessionMode } from '../domain/xp/kinds';
 import type { Answer, TrackId } from '../content/types';
 import type { Mark } from '../domain/pathway/pathway';
+import type { TextSize } from '../domain/display';
 
 /**
  * Progress only. Content lives in the bundle, so a content update never
@@ -90,6 +91,9 @@ export interface SettingsRow {
   characterName: string;
   /** Tracks shown on Today, picked at onboarding. */
   tracks: TrackId[];
+  /** No motion anywhere, same information. The system's reduced-motion setting also turns it on. */
+  calm: boolean;
+  textSize: TextSize;
   /** Set when onboarding finishes. Missing means the welcome screen still runs. */
   onboardedAt?: number;
   schemaVersion: number;

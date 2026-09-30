@@ -121,7 +121,7 @@
     background: var(--color-base);
     color: var(--color-text);
     font-family: var(--font-sans);
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.5;
     -webkit-text-size-adjust: 100%;
   }
@@ -178,4 +178,10 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Calm mode (Me): the same as reduced motion, chosen in the app. */
+:root[data-calm] *, :root[data-calm] *::before, :root[data-calm] *::after {
+  animation: none !important;
+  transition: none !important;
 }

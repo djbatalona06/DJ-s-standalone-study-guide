@@ -14,6 +14,8 @@ export function defaultSettings(): SettingsRow {
     newPerDay: 12,
     characterName: '',
     tracks: ['cs50', 'a1'],
+    calm: false,
+    textSize: 'default',
     schemaVersion: SCHEMA_VERSION,
   };
 }
