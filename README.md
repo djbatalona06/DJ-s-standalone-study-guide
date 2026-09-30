@@ -50,7 +50,8 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
 
 - **Scheduler and queue** ported from HeartBeat's `domain/study/srs.ts`, same behaviour:
   ease 2.5 (floor 1.3, ceiling 3), `again` returns the card today without resetting it.
-- **CS50 deck**: 43 original cards across weeks 0–5, each with a "why". Every card has a
+- **CS50 deck**: 99 original cards across weeks 0–9 (C, memory and data structures, then Python, SQL,
+  HTML/CSS/JavaScript and Flask), each with a "why" and a hint. Every card has a
   `provenance`; the validator fails the build on a blank one. CS50's own text is CC BY-NC-SA,
   so none is copied.
 - **Tracks and domains** for A+ Core 1 and Core 2 with the exam weightings, used for the
@@ -107,7 +108,7 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
 
 ## What is not built yet
 
-More diagrams, more CS50 cards (weeks 6–9), hotspot questions, the career
+More diagrams, CS50 quizzes, hotspot questions, the career
 pathway (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
