@@ -182,6 +182,22 @@ async function answerAny(page) {
   await context.close();
 }
 
+// ------------------------------------------------------ typing battle vs the bot
+{
+  const { page, context } = await learner();
+  await page.goto(U + '#/learn'); await page.getByRole('button', { name: /^Battle the bot/ }).first().click();
+  await page.getByRole('button', { name: 'Start battle' }).click();
+  for (let i = 0; i < 7; i++) {
+    await page.locator('#battle-input').fill('no idea'); await page.keyboard.press('Enter');
+    await page.waitForSelector('[role=status]:has-text("Score:")');
+    await page.getByRole('button', { name: /Next round|See result/ }).click();
+  }
+  await page.waitForSelector('text=/You won|The bot won|A draw/');
+  const saved = await page.evaluate(() => new Promise((r) => { const o = indexedDB.open('lantern'); o.onsuccess = () => { const t = o.result.transaction(['sessions', 'outbox']); const a = t.objectStore('sessions').getAll(); const b = t.objectStore('outbox').getAll(); t.oncomplete = () => r({ modes: a.result.map((x) => x.mode), kinds: b.result.map((x) => x.kind) }); }; }));
+  ok(saved.modes.includes('battle') && saved.kinds.includes('match'), `a battle is saved, and reported to HeartBeat as a match session (${JSON.stringify(saved)})`);
+  await context.close();
+}
+
 // ------------------------------------------------------------------- axe
 for (const scheme of ['light', 'dark']) {
   const { page, context } = await learner({ scheme, bypassCSP: true });
@@ -204,6 +220,8 @@ for (const scheme of ['light', 'dark']) {
   await page.goto(U + '#/review/a1'); await page.waitForSelector('#recall-mode');
   await page.locator('#recall-mode').click(); await page.locator('#recall-input').fill('a guess'); await page.keyboard.press('Enter');
   await page.waitForSelector('[role=status]:has-text("Suggested:")'); await audit('a typed-recall review');
+  await page.goto(U + '#/battle/a1'); await page.waitForSelector('text=Start battle'); await audit('the battle setup');
+  await page.getByRole('button', { name: 'Start battle' }).click(); await page.waitForSelector('#battle-input'); await audit('a battle round');
   await page.goto(U + '#/learn'); await page.goto(U + '#/quiz/a1-d2'); await page.waitForSelector('text=Check answer'); await audit('a quiz question');
   await page.goto(U + '#/exam/a1'); await page.waitForSelector('text=Start exam'); await audit('the exam intro');
   await context.close();

@@ -19,6 +19,7 @@ const ReviewSession = lazy(() => import('./features/review/ReviewSession').then(
 const DiagramPage = lazy(() => import('./features/diagram/DiagramPage'));
 // Quizzes and exams too: they carry the question renderer and the exam clock.
 const QuizPage = lazy(() => import('./features/quiz/QuizSession').then((m) => ({ default: m.QuizPage })));
+const BattlePage = lazy(() => import('./features/battle/BattlePage').then((m) => ({ default: m.BattlePage })));
 const ExamPage = lazy(() => import('./features/quiz/ExamSession').then((m) => ({ default: m.ExamPage })));
 
 const Loading = () => <p className="p-6 font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
@@ -44,6 +45,16 @@ export function App() {
       <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
         <Suspense fallback={<Loading />}>
           <ReviewSession key={route.name} trackId={route.track} study={route.name === 'study'} onExit={() => go({ name: route.name === 'study' ? 'learn' : 'today' })} />
+        </Suspense>
+      </main>
+    );
+  }
+
+  if (route.name === 'battle') {
+    return (
+      <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
+        <Suspense fallback={<Loading />}>
+          <BattlePage key={route.track} trackId={route.track} onExit={() => go({ name: 'learn' })} />
         </Suspense>
       </main>
     );
