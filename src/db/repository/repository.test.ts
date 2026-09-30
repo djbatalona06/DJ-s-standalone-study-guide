@@ -6,7 +6,7 @@ import { db } from '../database';
 import {
   creditedOn, exportProgress, finishSession, flushOutbox, getSettings, gradeCard, importProgress,
   introducedOn, linkHeartBeat, loadStates, parseBackup, pendingCount, saveSettings, sessionsOn,
-  startSession, unlinkHeartBeat,
+  startSession, unlinkHeartBeat, cleanCharacterName, MAX_CHARACTER_NAME,
 } from './index';
 import type { FetchLike } from '../../xp/client';
 import { MIN_CARDS_FOR_XP } from '../../domain/xp/kinds';
@@ -196,11 +196,40 @@ describe('backup', () => {
     expect(await importProgress(file)).toMatchObject({ cardsAdded: 0, reviewsAdded: 0, sessionsAdded: 0 });
   });
 
+  it('carries the character’s name to a device that has not named him yet', async () => {
+    await saveSettings({ characterName: 'Zero' });
+    const file = await exportProgress(1);
+    await db.delete();
+    await db.open();
+    await importProgress(file);
+    expect((await getSettings()).characterName).toBe('Zero');
+  });
+
+  it('never renames a character this device already named', async () => {
+    await saveSettings({ characterName: 'Zero' });
+    const file = await exportProgress(1);
+    await saveSettings({ characterName: 'Ghost' });
+    await importProgress(file);
+    expect((await getSettings()).characterName).toBe('Ghost');
+  });
+
   it('rejects things that are not a backup', () => {
     expect(parseBackup('nope')).toEqual({ ok: false, problem: 'not-json' });
     expect(parseBackup('{"app":"other"}')).toEqual({ ok: false, problem: 'not-lantern' });
     expect(parseBackup(JSON.stringify({
       app: 'lantern', schemaVersion: 99, cardState: [], reviewLog: [], sessions: [],
     }))).toEqual({ ok: false, problem: 'newer-version' });
+  });
+});
+
+describe('character name', () => {
+  it('is empty until the learner types one', async () => {
+    expect((await getSettings()).characterName).toBe('');
+  });
+
+  it('is trimmed, collapsed and bounded', () => {
+    expect(cleanCharacterName('  neo   the  one ')).toBe('neo the one');
+    expect(cleanCharacterName('x'.repeat(40))).toHaveLength(MAX_CHARACTER_NAME);
+    expect(cleanCharacterName('   ')).toBe('');
   });
 });

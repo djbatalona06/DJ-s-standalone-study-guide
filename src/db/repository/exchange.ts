@@ -1,6 +1,6 @@
 import { db, type ReviewLogRow, type SessionRow } from '../database';
 import type { CardState } from '../../domain/srs/srs';
-import { SCHEMA_VERSION, getSettings, saveSettings } from './settings';
+import { SCHEMA_VERSION, cleanCharacterName, getSettings, saveSettings } from './settings';
 
 /**
  * The backup file. Progress only: the study token is never in it, so a backup
@@ -10,7 +10,7 @@ export interface BackupFile {
   app: 'lantern';
   schemaVersion: number;
   exportedAt: number;
-  settings: { timeZone: string; newPerDay: number; heartbeatOrigin: string };
+  settings: { timeZone: string; newPerDay: number; heartbeatOrigin: string; characterName?: string };
   cardState: CardState[];
   reviewLog: ReviewLogRow[];
   sessions: SessionRow[];
@@ -31,6 +31,7 @@ export async function exportProgress(at: number): Promise<BackupFile> {
       timeZone: settings.timeZone,
       newPerDay: settings.newPerDay,
       heartbeatOrigin: settings.heartbeatOrigin,
+      characterName: settings.characterName,
     },
     cardState,
     reviewLog,
@@ -71,7 +72,8 @@ export function parseBackup(text: string): { ok: true; file: BackupFile } | { ok
  *
  * - A card keeps whichever copy was reviewed last.
  * - Review logs and sessions are unioned by id.
- * - Settings and the study token stay as they are here.
+ * - Settings and the study token stay as they are here, except that a device
+ *   whose character has no name yet takes the backup's.
  */
 export async function importProgress(file: BackupFile): Promise<ImportSummary> {
   const summary: ImportSummary = { cardsAdded: 0, cardsUpdated: 0, reviewsAdded: 0, sessionsAdded: 0 };
@@ -98,6 +100,8 @@ export async function importProgress(file: BackupFile): Promise<ImportSummary> {
     summary.sessionsAdded = newSessions.length;
   });
 
-  await saveSettings({});
+  const incomingName = cleanCharacterName(file.settings?.characterName ?? '');
+  const local = await getSettings();
+  await saveSettings(!local.characterName && incomingName ? { characterName: incomingName } : {});
   return summary;
 }

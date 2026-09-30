@@ -43,6 +43,12 @@ export interface SettingsRow {
   linkState: LinkState;
   /** How many never-seen cards a day introduces. */
   newPerDay: number;
+  /** What the learner named the character. Typed in at onboarding; never a default. */
+  characterName: string;
+  /** Tracks shown on Today, picked at onboarding. */
+  tracks: TrackId[];
+  /** Set when onboarding finishes. Missing means the welcome screen still runs. */
+  onboardedAt?: number;
   schemaVersion: number;
 }
 

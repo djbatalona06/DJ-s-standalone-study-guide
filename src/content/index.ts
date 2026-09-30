@@ -1,3 +1,4 @@
+import { A1_CARDS } from './aplus-core1';
 import { CS50_CARDS } from './cs50';
 import { DOMAINS, TRACKS } from './tracks';
 import type { Card, Domain, Track, TrackId } from './types';
@@ -6,7 +7,7 @@ export { DOMAINS, TRACKS };
 export type { Card, Domain, Track, TrackId };
 
 /** Every card in the bundle. A+ decks join this list as they are written. */
-export const CARDS: Card[] = [...CS50_CARDS];
+export const CARDS: Card[] = [...CS50_CARDS, ...A1_CARDS];
 
 export const CARD_BY_ID: ReadonlyMap<string, Card> = new Map(CARDS.map((card) => [card.id, card]));
 
