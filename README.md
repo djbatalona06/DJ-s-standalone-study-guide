@@ -21,9 +21,10 @@ npm run dev        # http://localhost:5173
 npm test           # scheduler, queue, outbox, content, questions, quiz engine, exam clock, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
+npm run e2e        # browser test of the built app (needs `npx playwright install chromium` once)
 ```
 
-The same three checks run on every pull request and push to `main` in GitHub Actions
+The same checks run on every pull request and push to `main` in GitHub Actions
 (`.github/workflows/ci.yml`); a red check means one of them failed.
 
 ## Put it on your phone (Cloudflare Pages)
@@ -89,6 +90,8 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
   written from the 220-1201 objectives as an outline, each with a why and a hint.
 - **Installable and offline:** a service worker precaches the app; diagram art is cached
   the first time you open it.
+- **Measured:** Lighthouse on mobile (simulated slow 4G): Accessibility 100, Best Practices 100, SEO 100,
+  Performance 85. `npm run e2e` drives the built app in a real browser and runs axe on the main screens.
 
 ## What exists (quizzes and exams)
 
@@ -130,8 +133,8 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
 
 ## What is not built yet
 
-CS50 quizzes, a Lighthouse
-pass, and a headless keyboard test in CI. See `docs/06-Implementation-Plan.md`.
+CS50 quizzes, calm mode, an install
+prompt, and a person's screen-reader walk of every screen. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
 

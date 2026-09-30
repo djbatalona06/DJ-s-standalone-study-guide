@@ -19,8 +19,9 @@ type Step = 'name' | 'tracks' | 'link';
  */
 export function WelcomePage() {
   const settings = useSettings();
-  const library = useLibrary();
   const [step, setStep] = useState<Step>('name');
+  // Only the tracks step shows card counts, so the first paint does not wait for the library.
+  const library = useLibrary(step === 'tracks');
   const [name, setName] = useState(settings.characterName);
   const [tracks, setTracks] = useState<TrackId[]>(settings.tracks);
   const [token, setToken] = useState('');

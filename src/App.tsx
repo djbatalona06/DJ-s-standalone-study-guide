@@ -1,16 +1,19 @@
 import { Suspense, lazy } from 'react';
 import { go, useRoute } from './app/useRoute';
 import { Shell } from './components/Shell';
-import { FlashcardsPage } from './features/flashcards/FlashcardsPage';
-import { LearnPage } from './features/learn/LearnPage';
-import { MePage } from './features/me/MePage';
-import { NodePage } from './features/path/NodePage';
-import { PathPage } from './features/path/PathPage';
-import { ReviewSession } from './features/review/ReviewSession';
 import { TodayPage } from './features/today/TodayPage';
 import { useSettingsRow } from './features/useApp';
 import { WelcomePage } from './features/welcome/WelcomePage';
 
+// Screens a first visit does not need are their own chunks, so the first paint
+// downloads only the shell, Today and the welcome flow. The diagram viewer,
+// quizzes and exams are chunks for the same reason.
+const LearnPage = lazy(() => import('./features/learn/LearnPage').then((m) => ({ default: m.LearnPage })));
+const MePage = lazy(() => import('./features/me/MePage').then((m) => ({ default: m.MePage })));
+const PathPage = lazy(() => import('./features/path/PathPage').then((m) => ({ default: m.PathPage })));
+const NodePage = lazy(() => import('./features/path/NodePage').then((m) => ({ default: m.NodePage })));
+const FlashcardsPage = lazy(() => import('./features/flashcards/FlashcardsPage').then((m) => ({ default: m.FlashcardsPage })));
+const ReviewSession = lazy(() => import('./features/review/ReviewSession').then((m) => ({ default: m.ReviewSession })));
 // The diagram viewer is its own chunk: nobody pays for it until they open one.
 const DiagramPage = lazy(() => import('./features/diagram/DiagramPage'));
 // Quizzes and exams too: they carry the question renderer and the exam clock.
@@ -31,7 +34,9 @@ export function App() {
   if (route.name === 'review') {
     return (
       <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
-        <ReviewSession trackId={route.track} onExit={() => go({ name: 'today' })} />
+        <Suspense fallback={<Loading />}>
+          <ReviewSession trackId={route.track} onExit={() => go({ name: 'today' })} />
+        </Suspense>
       </main>
     );
   }
@@ -52,17 +57,15 @@ export function App() {
 
   return (
     <Shell route={route}>
-      {route.name === 'today' && <TodayPage />}
-      {route.name === 'learn' && <LearnPage />}
-      {route.name === 'me' && <MePage />}
-      {route.name === 'path' && <PathPage />}
-      {route.name === 'node' && <NodePage key={route.id} id={route.id} />}
-      {route.name === 'flashcards' && <FlashcardsPage key={route.deck} deckId={route.deck} />}
-      {route.name === 'diagram' && (
-        <Suspense fallback={<Loading />}>
-          <DiagramPage id={route.id} />
-        </Suspense>
-      )}
+      <Suspense fallback={<Loading />}>
+        {route.name === 'today' && <TodayPage />}
+        {route.name === 'learn' && <LearnPage />}
+        {route.name === 'me' && <MePage />}
+        {route.name === 'path' && <PathPage />}
+        {route.name === 'node' && <NodePage key={route.id} id={route.id} />}
+        {route.name === 'flashcards' && <FlashcardsPage key={route.deck} deckId={route.deck} />}
+        {route.name === 'diagram' && <DiagramPage id={route.id} />}
+      </Suspense>
     </Shell>
   );
 }

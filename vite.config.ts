@@ -12,7 +12,8 @@ export default defineConfig({
       // A new version waits until every Lantern tab is closed, so an update
       // never reloads the page in the middle of a review.
       registerType: 'prompt',
-      injectRegister: 'script',
+      // Deferred, so registering the worker never blocks the first paint.
+      injectRegister: 'script-defer',
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Lantern',
