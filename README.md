@@ -18,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 146 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
+npm test           # scheduler, queue, outbox, content, questions, quiz engine, exam clock, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -84,10 +84,26 @@ to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address i
 - **Installable and offline:** a service worker precaches the app; diagram art is cached
   the first time you open it.
 
+## What exists (quizzes and exams)
+
+- **Four question types**, all keyboard operable: multiple choice, multi-select (the exact set, no partial
+  credit), ordering (arrow buttons, no dragging) and matching (native selects). Every question has an
+  explanation, and most link to the card that covers it: a miss brings that card back in Review today.
+- **Quick quiz** per domain or track (10 questions: unseen first, then last-missed, then last-right).
+  Sessions of 5+ answers earn a `quiz` credit in HeartBeat.
+- **Practice exam** per track: questions follow the exam's domain weights and favour ones you have not
+  asked yet. It scales down with the bank (71 Core 1 questions today, so 71 questions in 71 minutes) and becomes
+  the real 90 in 90 as the bank grows. The clock stops while the tab is hidden, flags and a question list
+  work, and a reload resumes where you were. Submitting earns a `weekly` credit and shows domain scores
+  and every miss with its explanation.
+- **Readiness** now blends recent quiz accuracy with card recall, and Learn shows the booking rule
+  (readiness and your last two exams at 85%).
+- Question banks are their own chunk (`src/content/questions/`), loaded only when you open a quiz.
+
 ## What is not built yet
 
-More diagrams, quizzes and exams, Core 2 cards, the career pathway
-(and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
+More diagrams, Core 2 cards and questions, more CS50 cards (weeks 6–9), hotspot questions, the career
+pathway (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
 

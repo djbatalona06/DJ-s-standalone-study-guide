@@ -12,7 +12,7 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **SRS:** SM-2 port from HeartBeat `srs.ts`: ease starts 2.5, floor 1.3, ceiling 3; grades Again/Hard/Good/Easy; "again" = quality 2, returns the card today and dents ease (no reset).
 
-**Questions:** MCQ, multi-select (exact set), ordering, match, hotspot-on-diagram, lightweight PBQ; explanation mandatory. **Exam:** 90 questions, 90 minutes, timer pauses when tab hidden, flags, resume.
+**Questions:** MCQ, multi-select (exact set), ordering and match are built; hotspot-on-diagram is not; explanation mandatory. **Exam:** built; scales to the bank up to 90 questions in 90 minutes; timer (`domain/quiz/clock.ts`) pauses when the tab is hidden; flags; saved on every change and resumes after a reload.
 
 **Readiness** = Σ domain.weight × mastery(domain); mastery = 0.5 recall + 0.5 quiz accuracy (tunable). Book exam when readiness ≥ 85% and last two full exams ≥ 85% (personal rule).
 
@@ -22,7 +22,7 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **Local tables:** cardState, reviewLog, quizAnswers, sessions (id = XP sessionId), mastery, pathProgress, userCards, syncQueue, settings (studyToken never exported), meta. Import merge: greater `lastReviewedAt` wins per card; logs union by id; never import the token.
 
-**Content so far:** CS50 43 cards (weeks 0–5); A+ Core 1 110 cards across all five domains; Core 2 none yet.
+**Content so far:** CS50 43 cards (weeks 0–5); A+ Core 1 110 cards and 71 questions across all five domains; Core 2 none yet. Question banks are lazy chunks in `src/content/questions/`, checked by `validateQuestions`; each question may name a `cardId` that a miss brings back today.
 
 **UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Explore, Label, Match and list view built. Flashcards mode (`/flashcards/:deck`, Quizlet layout, not graded) with a required written `hint` on every card. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
 

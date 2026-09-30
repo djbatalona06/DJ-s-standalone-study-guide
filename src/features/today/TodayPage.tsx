@@ -16,7 +16,7 @@ import { buildQueue } from '@/domain/srs/queue';
 import { readiness } from '@/domain/mastery/readiness';
 import { streak } from '@/domain/streak';
 import { XP_DAILY_CAP } from '@/domain/xp/kinds';
-import { useSettings, useStates, useStudyDays, useToday } from '../useApp';
+import { useQuizAccuracy, useSettings, useStates, useStudyDays, useToday } from '../useApp';
 
 function greeting(hour: number): string {
   if (hour < 5) return 'Up late';
@@ -29,6 +29,7 @@ export function TodayPage() {
   const settings = useSettings();
   const day = useToday();
   const states = useStates();
+  const quiz = useQuizAccuracy();
   const studied = useStudyDays();
   const pending = useLiveQuery(async () => {
     const rows = await db.outbox.toArray();
@@ -41,7 +42,7 @@ export function TodayPage() {
     return rows.reduce((n, row) => n + (row?.xp ?? 0), 0);
   }, [day]);
 
-  if (!states || introduced === undefined || !studied) {
+  if (!states || !quiz || introduced === undefined || !studied) {
     return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
   }
 
@@ -54,6 +55,7 @@ export function TodayPage() {
     const ready = readiness(
       domainsOf(track.id).map((d) => ({ id: d.id, weight: d.weight, cardIds: cardsOfDomain(d.id).map((c) => c.id) })),
       states,
+      quiz,
     );
     const weakest = ready.weakest && ready.readiness > 0
       ? domainsOf(track.id).find((d) => d.id === ready.weakest?.domainId)?.title

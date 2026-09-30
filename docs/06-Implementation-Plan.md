@@ -86,6 +86,13 @@ DoD: two full practice exams per core can be completed and reviewed; readiness u
 
 ---
 
+**Progress (2026-09-30, quizzes and exams):**
+- Done: tasks 1–4 and 6 for Core 1. Question types mcq, multi (exact set), ordering and matching, with pure scoring, seeded shuffling, weighted exam building, a visibility-aware clock, and mastery/booking maths, all tested (`src/domain/quiz/`, `src/domain/mastery/`).
+- Storage: Dexie schema 2 adds `quizAnswers` and `exams`; an exam is saved on every change and resumes after a reload; finishing is one transaction (answers, score, queued XP) and safe to call twice. Backups carry answers and finished exams.
+- Screens: Quick quiz per domain/track, Practice exam (intro/resume, runner with flags and question list, results with every miss explained). Verified in headless Chromium at 390 px: full flow, timer pause while hidden, reload-resume, strict CSP with no violations, axe clean in light and dark.
+- 71 Core 1 questions (Mobile 10, Networking 17, Hardware 16, Virtualization 9, Troubleshooting 19). The exam scales to the bank, so it reaches the full 90 questions in 90 minutes once the bank does; grow it toward 150+ so two exams stay mostly fresh.
+- Not yet: hotspot questions (need more diagrams), a lightweight PBQ beyond ordering and matching, Core 2.
+
 ## Phase 4 — Career pathway (M)
 
 Tasks

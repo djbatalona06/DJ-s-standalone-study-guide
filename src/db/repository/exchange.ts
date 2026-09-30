@@ -1,4 +1,4 @@
-import { db, type ReviewLogRow, type SessionRow } from '../database';
+import { db, type ExamRow, type QuizAnswerRow, type ReviewLogRow, type SessionRow } from '../database';
 import type { CardState } from '../../domain/srs/srs';
 import { SCHEMA_VERSION, cleanCharacterName, getSettings, saveSettings } from './settings';
 
@@ -14,14 +14,20 @@ export interface BackupFile {
   cardState: CardState[];
   reviewLog: ReviewLogRow[];
   sessions: SessionRow[];
+  /** Added in schema 2; a backup from an older version simply lacks them. */
+  quizAnswers?: QuizAnswerRow[];
+  /** Finished exams only: an exam in progress is not something to carry to another device. */
+  exams?: ExamRow[];
 }
 
 export async function exportProgress(at: number): Promise<BackupFile> {
   const settings = await getSettings();
-  const [cardState, reviewLog, sessions] = await Promise.all([
+  const [cardState, reviewLog, sessions, quizAnswers, exams] = await Promise.all([
     db.cardState.toArray(),
     db.reviewLog.toArray(),
     db.sessions.toArray(),
+    db.quizAnswers.toArray(),
+    db.exams.filter((e) => e.status === 'done').toArray(),
   ]);
   return {
     app: 'lantern',
@@ -36,6 +42,8 @@ export async function exportProgress(at: number): Promise<BackupFile> {
     cardState,
     reviewLog,
     sessions,
+    quizAnswers,
+    exams,
   };
 }
 
@@ -46,6 +54,8 @@ export interface ImportSummary {
   cardsUpdated: number;
   reviewsAdded: number;
   sessionsAdded: number;
+  answersAdded: number;
+  examsAdded: number;
 }
 
 /** Parses and checks a backup without touching the database. */
@@ -71,14 +81,14 @@ export function parseBackup(text: string): { ok: true; file: BackupFile } | { ok
  * Merges a backup into this device without ever deleting anything.
  *
  * - A card keeps whichever copy was reviewed last.
- * - Review logs and sessions are unioned by id.
+ * - Review logs, sessions, quiz answers and finished exams are unioned by id.
  * - Settings and the study token stay as they are here, except that a device
  *   whose character has no name yet takes the backup's.
  */
 export async function importProgress(file: BackupFile): Promise<ImportSummary> {
-  const summary: ImportSummary = { cardsAdded: 0, cardsUpdated: 0, reviewsAdded: 0, sessionsAdded: 0 };
+  const summary: ImportSummary = { cardsAdded: 0, cardsUpdated: 0, reviewsAdded: 0, sessionsAdded: 0, answersAdded: 0, examsAdded: 0 };
 
-  await db.transaction('rw', db.cardState, db.reviewLog, db.sessions, async () => {
+  await db.transaction('rw', db.cardState, db.reviewLog, db.sessions, db.quizAnswers, db.exams, async () => {
     for (const incoming of file.cardState) {
       const local = await db.cardState.get(incoming.cardId);
       if (!local) {
@@ -98,6 +108,16 @@ export async function importProgress(file: BackupFile): Promise<ImportSummary> {
     const newSessions = file.sessions.filter((row) => !knownSessions.has(row.id));
     await db.sessions.bulkPut(newSessions);
     summary.sessionsAdded = newSessions.length;
+
+    const knownAnswers = new Set(await db.quizAnswers.toCollection().primaryKeys());
+    const newAnswers = (file.quizAnswers ?? []).filter((row) => !knownAnswers.has(row.id));
+    await db.quizAnswers.bulkPut(newAnswers);
+    summary.answersAdded = newAnswers.length;
+
+    const knownExams = new Set(await db.exams.toCollection().primaryKeys());
+    const newExams = (file.exams ?? []).filter((row) => row.status === 'done' && !knownExams.has(row.id));
+    await db.exams.bulkPut(newExams);
+    summary.examsAdded = newExams.length;
   });
 
   const incomingName = cleanCharacterName(file.settings?.characterName ?? '');

@@ -1,4 +1,4 @@
-import { Cpu, Layers } from 'lucide-react';
+import { ClipboardCheck, Cpu, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/8bit/button';
 import { Progress } from '@/components/ui/8bit/progress';
 import { PageHead } from '@/components/Shell';
@@ -6,13 +6,29 @@ import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
 import { go } from '@/app/useRoute';
 import { diagramsOf } from '@/content/diagrams';
-import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf } from '@/content';
-import { domainMastery } from '@/domain/mastery/readiness';
-import { useStates } from '../useApp';
+import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf, type TrackId } from '@/content';
+import type { CardState } from '@/domain/srs/srs';
+import { TRACKS_WITH_QUESTIONS } from '@/content/questions';
+import { bookingAdvice } from '@/domain/mastery/booking';
+import { domainMastery, readiness } from '@/domain/mastery/readiness';
+import { useQuizAccuracy, useRecentExams, useStates } from '../useApp';
+
+/** Every track's hooks in one component, so the page can map over tracks without hooks in a loop. */
+function Booking({ trackId, states, quiz }: { trackId: TrackId; states: Map<string, CardState>; quiz: Map<string, number> }) {
+  const exams = useRecentExams(trackId);
+  if (!exams) return null;
+  const ready = readiness(
+    domainsOf(trackId).map((d) => ({ id: d.id, weight: d.weight, cardIds: cardsOfDomain(d.id).map((c) => c.id) })),
+    states,
+    quiz,
+  ).readiness;
+  return <p className="text-sm">{bookingAdvice(ready, exams).message}</p>;
+}
 
 export function LearnPage() {
   const states = useStates();
-  if (!states) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
+  const quiz = useQuizAccuracy();
+  if (!states || !quiz) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
   return (
     <>
@@ -33,6 +49,7 @@ export function LearnPage() {
                 const mastery = domainMastery(
                   { id: domain.id, weight: domain.weight, cardIds: cards.map((c) => c.id) },
                   states,
+                  quiz.get(domain.id),
                 );
                 const pct = Math.round(mastery.mastery * 100);
                 return (
@@ -59,6 +76,14 @@ export function LearnPage() {
                         <Layers aria-hidden="true" className="size-4" /> Flashcards ({cards.length})
                       </a>
                     ) : null}
+                    {TRACKS_WITH_QUESTIONS.includes(track.id) ? (
+                      <a
+                        href={href({ name: 'quiz', scope: domain.id })}
+                        className="mt-3 mr-6 inline-flex min-h-12 items-center gap-2 text-(--color-accent) underline-offset-4 hover:underline"
+                      >
+                        <ClipboardCheck aria-hidden="true" className="size-4" /> Quiz
+                      </a>
+                    ) : null}
                     {diagramsOf(domain.id).map((diagram) => (
                       <a
                         key={diagram.id}
@@ -72,6 +97,13 @@ export function LearnPage() {
                 );
               })}
             </ul>
+            {track.exam && TRACKS_WITH_QUESTIONS.includes(track.id) ? <Booking trackId={track.id} states={states} quiz={quiz} /> : null}
+            {TRACKS_WITH_QUESTIONS.includes(track.id) ? (
+              <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                <Button asChild variant="secondary" className="h-12"><a href={href({ name: 'quiz', scope: track.id })}>Quick quiz</a></Button>
+                {track.exam ? <Button asChild className="h-12"><a href={href({ name: 'exam', track: track.id })}>Practice exam</a></Button> : null}
+              </div>
+            ) : null}
             {hasCards ? (
               <div className="mt-2 grid gap-4 sm:grid-cols-2">
                 <Button className="h-12" onClick={() => go({ name: 'review', track: track.id })}>

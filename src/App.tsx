@@ -11,6 +11,9 @@ import { WelcomePage } from './features/welcome/WelcomePage';
 
 // The diagram viewer is its own chunk: nobody pays for it until they open one.
 const DiagramPage = lazy(() => import('./features/diagram/DiagramPage'));
+// Quizzes and exams too: they carry the question renderer and the exam clock.
+const QuizPage = lazy(() => import('./features/quiz/QuizSession').then((m) => ({ default: m.QuizPage })));
+const ExamPage = lazy(() => import('./features/quiz/ExamSession').then((m) => ({ default: m.ExamPage })));
 
 const Loading = () => <p className="p-6 font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
@@ -27,6 +30,20 @@ export function App() {
     return (
       <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
         <ReviewSession trackId={route.track} onExit={() => go({ name: 'today' })} />
+      </main>
+    );
+  }
+
+  // A quiz or an exam is one thing too: no tab bar, and it hands back to Learn.
+  if (route.name === 'quiz' || route.name === 'exam') {
+    const back = () => go({ name: 'learn' });
+    return (
+      <main className="mx-auto w-full max-w-(--shell-max) px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-6">
+        <Suspense fallback={<Loading />}>
+          {route.name === 'quiz'
+            ? <QuizPage key={route.scope} scope={route.scope} onExit={back} />
+            : <ExamPage key={route.track} trackId={route.track} onExit={back} />}
+        </Suspense>
       </main>
     );
   }

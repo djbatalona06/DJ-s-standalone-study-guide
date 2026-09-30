@@ -3,7 +3,7 @@ import { deviceTimeZone } from '../../domain/day';
 
 /** Where HeartBeat lives unless somebody says otherwise. */
 export const DEFAULT_HEARTBEAT_ORIGIN = 'https://heartbeat-eop.pages.dev';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export function defaultSettings(): SettingsRow {
   return {
