@@ -23,6 +23,9 @@ npm run typecheck
 npm run build
 ```
 
+The same three checks run on every pull request and push to `main` in GitHub Actions
+(`.github/workflows/ci.yml`); a red check means one of them failed.
+
 ## What exists (Phase 1)
 
 - **Scheduler and queue** ported from HeartBeat's `domain/study/srs.ts`, same behaviour:
