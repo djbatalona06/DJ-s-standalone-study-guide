@@ -12,8 +12,9 @@ export default defineConfig({
       // A new version waits until every Lantern tab is closed, so an update
       // never reloads the page in the middle of a review.
       registerType: 'prompt',
-      // Deferred, so registering the worker never blocks the first paint.
-      injectRegister: 'script-defer',
+      // Registered from UpdateBanner (virtual:pwa-register/react), which shows
+      // the "new version ready" prompt; nothing else registers the worker.
+      injectRegister: false,
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Lantern',
