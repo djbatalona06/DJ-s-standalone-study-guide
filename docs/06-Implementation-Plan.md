@@ -63,7 +63,8 @@ DoD: the motherboard diagram is fully usable with keyboard and screen reader; ax
 - Also closed from Phase 1: onboarding, hash routes, the install/offline service worker, and the 8-bit theme plus the learner-named character (UI brief §2a–2b).
 - Also added: Flashcards mode (Quizlet layout) and a written hint on all 58 cards; the validator requires hints and rejects ones that contain the answer.
 - Match mode (task 3): pick a name, pick a part, instant ✓/✗ with icon and text; right pairs lock, first-try matches are scored (`src/domain/diagram/match.ts`); finishing queues `match`. Verified at 390 and 1280 px, dark and light, axe clean, full keyboard-only walk.
-- Next: the RAM-keying diagram; the rest of the Core 1 cards (task 4); a headless keyboard test in CI.
+- Task 4: 110 Core 1 cards (Mobile 15, Networking 25, Hardware 30, Virtualization/Cloud 12, Troubleshooting 28), all `objective-outline` with a why and a hint; a test keeps every Core 1 domain at 10+ cards. Initial JS ≈ 137 kB gzip with them: split the decks into lazy chunks before Core 2 lands. Domain weights still not verified against CompTIA's page (unreachable from the build environment).
+- Next: the RAM-keying diagram; a headless keyboard test in CI.
 - CI: `.github/workflows/ci.yml` runs typecheck, tests and build on every PR and push to `main`.
 - Still open from Phase 1: the CS50 deck is at 43 cards of the 80–120 target (weeks 6–9 unwritten).
 

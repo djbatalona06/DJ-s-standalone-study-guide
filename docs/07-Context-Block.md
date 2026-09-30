@@ -22,6 +22,8 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **Local tables:** cardState, reviewLog, quizAnswers, sessions (id = XP sessionId), mastery, pathProgress, userCards, syncQueue, settings (studyToken never exported), meta. Import merge: greater `lastReviewedAt` wins per card; logs union by id; never import the token.
 
+**Content so far:** CS50 43 cards (weeks 0–5); A+ Core 1 110 cards across all five domains; Core 2 none yet.
+
 **UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Explore, Label, Match and list view built. Flashcards mode (`/flashcards/:deck`, Quizlet layout, not graded) with a required written `hint` on every card. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
 
 **Licensing:** original content only; CompTIA objectives as outline not text; never copy exam-dump questions; CS50 is CC BY-NC-SA 4.0 so write your own cards and link out; every card has `provenance`.

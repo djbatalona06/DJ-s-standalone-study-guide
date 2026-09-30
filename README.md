@@ -18,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 145 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
+npm test           # 146 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -57,13 +57,16 @@ The same three checks run on every pull request and push to `main` in GitHub Act
   Review is where cards get scheduled.
 - **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
   then check), Match (each pair is checked at once; right ones lock, first tries are scored),
-  and a list view (`L`). Fully keyboard-operable. 15 new A+ Core 1 cards.
+  and a list view (`L`). Fully keyboard-operable.
+- **A+ Core 1 deck:** 110 original cards across all five domains (Mobile 15, Networking 25,
+  Hardware 30 including the 15 motherboard cards, Virtualization/Cloud 12, Troubleshooting 28),
+  written from the 220-1201 objectives as an outline, each with a why and a hint.
 - **Installable and offline:** a service worker precaches the app; diagram art is cached
   the first time you open it.
 
 ## What is not built yet
 
-More diagrams, quizzes and exams, the rest of the A+ decks, the career pathway
+More diagrams, quizzes and exams, Core 2 cards, the career pathway
 (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
