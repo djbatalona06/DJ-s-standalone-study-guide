@@ -3,7 +3,7 @@ import type { Answer, Question } from '../../content/types';
 /** An untouched ordering question counts as unanswered, since it starts shuffled. */
 export function isAnswered(q: Question, a: Answer | undefined): boolean {
   if (a === undefined) return false;
-  if (q.type === 'mcq') return typeof a === 'number' && a >= 0;
+  if (q.type === 'mcq' || q.type === 'hotspot') return typeof a === 'number' && a >= 0;
   if (typeof a === 'number') return false;
   if (q.type === 'multi') return a.length > 0;
   if (q.type === 'order') return a.length === q.items.length;
@@ -17,7 +17,8 @@ const sameSet = (a: readonly number[], b: readonly number[]) =>
 export function isCorrect(q: Question, a: Answer | undefined): boolean {
   if (!isAnswered(q, a)) return false;
   switch (q.type) {
-    case 'mcq': return a === q.answer;
+    case 'mcq':
+    case 'hotspot': return a === q.answer;
     case 'multi': return Array.isArray(a) && sameSet(a, q.answers);
     case 'order': return Array.isArray(a) && a.every((v, i) => v === i);
     case 'match': return Array.isArray(a) && a.length === q.pairs.length && a.every((v, i) => v === i);

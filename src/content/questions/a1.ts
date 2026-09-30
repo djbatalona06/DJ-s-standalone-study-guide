@@ -231,5 +231,94 @@ const TROUBLE: Question[] = [
     'A damaged cable can force a link down to 100 Mbps or cause errors. Check the switch port’s negotiated speed.', 'a1-d5-network-slow'),
 ];
 
-export const A1_QUESTIONS: Question[] = [...MOBILE, ...NETWORK, ...HARDWARE, ...VIRT, ...TROUBLE];
+/** Pick the part of a diagram. Prompts ask by function, so choosing by name from the list tests the same thing. */
+const HOTSPOTS: Question[] = [
+  // Motherboard
+  h.hotspot('hs-eps8', 'Which part supplies power to the CPU’s voltage regulators?', 'motherboard', 'eps8',
+    'The 8-pin EPS connector feeds the CPU on +12 V, separately from the 24-pin main connector.', 'a1-d3-mb-eps8'),
+  h.hotspot('hs-cmos', 'Which part keeps the clock and firmware settings alive while the PC is unplugged?', 'motherboard', 'cmos',
+    'The coin cell on the board. A dead one loses the time and settings each time power is removed.', 'a1-d3-mb-cmos'),
+  h.hotspot('hs-x16', 'Which slot normally holds the graphics card?', 'motherboard', 'pcie-x16',
+    'The long PCIe x16 slot nearest the CPU has the most lanes and the shortest path to it.', 'a1-d3-mb-pcie-x16'),
+  h.hotspot('hs-front-panel', 'Where do the case’s power button and reset button connect?', 'motherboard', 'front-panel',
+    'The front-panel header takes the case’s power and reset buttons and its LEDs.', 'a1-d3-mb-front-panel'),
+  // Memory modules
+  h.hotspot('hs-sodimm', 'Which module type goes in a laptop?', 'ram-modules', 'sodimm',
+    'A SO-DIMM is about half the length of a desktop DIMM.', 'a1-d3-ram-sodimm'),
+  h.hotspot('hs-ecc', 'Which module has an extra chip that detects and corrects memory errors?', 'ram-modules', 'ecc',
+    'ECC modules carry one extra chip per side to store the check bits, which is why they are used in servers.', 'a1-d3-ram-ecc'),
+  h.hotspot('hs-notch', 'Which feature stops a module being fitted into a slot of the wrong generation?', 'ram-modules', 'notch',
+    'The key notch sits in a different place for each generation, so a mismatched module will not seat.', 'a1-d3-ram-notch'),
+  // Storage
+  h.hotspot('hs-sata-data', 'Which connector carries only data to a SATA drive?', 'storage', 'sata-data',
+    'The seven-pin SATA data connector carries no power. A separate 15-pin connector supplies that.', 'a1-d3-sto-sata-data'),
+  h.hotspot('hs-nvme', 'Which drive is a small module that runs over PCIe and has a single notch?', 'storage', 'm2nvme',
+    'NVMe SSDs use an M key with one notch and talk to the CPU over PCIe, which is much faster than SATA.', 'a1-d3-sto-m2-nvme'),
+  h.hotspot('hs-hdd', 'Which drive stores data on spinning platters?', 'storage', 'hdd35',
+    'The hard drive has platters and a moving head. SSDs have no moving parts.', 'a1-d3-sto-hdd35'),
+  // Power supply
+  h.hotspot('hs-pcie-power', 'Which connector powers a graphics card that needs more than the slot can give?', 'psu', 'pcie',
+    'The 6+2 PCIe lead gives 75 W (6-pin) or 150 W (8-pin) on top of the 75 W from the slot.', 'a1-d3-pc-pcie'),
+  h.hotspot('hs-atx24', 'Which connector brings main power to the motherboard?', 'psu', 'atx24',
+    'The 24-pin ATX connector is the widest and carries +3.3, +5 and +12 V plus control signals.', 'a1-d3-pc-atx24'),
+  h.hotspot('hs-molex', 'Which connector has yellow, red and two black wires and dates from before SATA?', 'psu', 'molex',
+    'A Molex plug carries +12 V (yellow), +5 V (red) and two grounds (black).', 'a1-d3-pc-molex'),
+  // Laser printer
+  h.hotspot('hs-fuser', 'Which part melts the toner into the paper?', 'laser-printer', 'fuser',
+    'The fuser uses heat and pressure. Toner that rubs off points at a failed fuser.', 'a1-d3-lp-fuser'),
+  h.hotspot('hs-laser', 'Which part writes the image onto the drum with light?', 'laser-printer', 'laser',
+    'The laser sweeps across the charged drum through a mirror, discharging where toner should stick.', 'a1-d3-lp-laser'),
+  h.hotspot('hs-transfer', 'Which part pulls toner off the drum onto the paper?', 'laser-printer', 'transfer',
+    'The transfer roller charges the paper so the toner is drawn across to it.', 'a1-d3-lp-transfer'),
+  h.hotspot('hs-pickup', 'Which part takes a single sheet from the tray?', 'laser-printer', 'pickup',
+    'The pickup roller. When it wears, the printer misfeeds or grabs several sheets at once.', 'a1-d3-lp-pickup'),
+  // Ports
+  h.hotspot('hs-vga', 'Which port carries analog video only?', 'ports', 'vga',
+    'VGA is analog and carries no audio. HDMI, DisplayPort and DVI-D are digital.', 'a1-d3-pt-vga'),
+  h.hotspot('hs-rj45', 'Which connector is used for wired Ethernet?', 'ports', 'rj45',
+    'RJ45 (8P8C) has eight contacts and a latch. RJ11, for telephones, is narrower.', 'a1-d3-pt-rj45'),
+  h.hotspot('hs-dp', 'Which port has one cut corner and can daisy-chain monitors?', 'ports', 'dp',
+    'DisplayPort has one cut corner and supports Multi-Stream Transport on displays that allow it.', 'a1-d3-pt-dp'),
+  h.hotspot('hs-usbc', 'Which small reversible port can carry data, video and charging?', 'ports', 'usbc',
+    'USB-C can carry USB data, DisplayPort video, Thunderbolt and Power Delivery, depending on the port.', 'a1-d3-pt-usbc'),
+  // Cables
+  h.hotspot('hs-sm', 'Which cable has a very thin core and is used for links of many kilometres?', 'cables', 'sm',
+    'Single-mode fiber carries one light path down a very thin core, which suits long distances.', 'a1-d3-cb-sm'),
+  h.hotspot('hs-st', 'Which fiber connector uses a twist-lock bayonet fitting?', 'cables', 'st',
+    'The ST connector is round and locks with a quarter turn. LC and SC are square.', 'a1-d3-cb-st'),
+  h.hotspot('hs-stp', 'Which copper cable adds a shield ring, for noisy environments?', 'cables', 'stp',
+    'Shielded twisted pair adds a foil or braid around the pairs, which needs to be grounded properly.', 'a1-d3-cb-stp'),
+  // CPU cooling
+  h.hotspot('hs-pump', 'Which part sits on the CPU of a liquid cooler and moves the coolant?', 'cpu-cooling', 'pump',
+    'The pump block picks up the CPU’s heat and circulates the liquid around the loop.', 'a1-d3-cool-pump'),
+  h.hotspot('hs-paste', 'Which layer fills tiny gaps between the CPU and the cooler so heat passes across?', 'cpu-cooling', 'paste',
+    'Thermal paste replaces the insulating air in the microscopic gaps between the two metal surfaces.', 'a1-d3-cool-paste'),
+  h.hotspot('hs-radiator', 'Which part passes the coolant’s heat to the air?', 'cpu-cooling', 'radiator',
+    'The radiator’s fins do the exchange, helped by fans pushing air through.', 'a1-d3-cool-radiator'),
+  // OSI
+  n.hotspot('hs-l3', 'Which layer do routers work at?', 'osi', 'l3',
+    'Layer 3, the network layer, deals in IP addresses and routing between networks.', 'a1-d2-osi-3'),
+  n.hotspot('hs-l2', 'Which layer do switches and MAC addresses belong to?', 'osi', 'l2',
+    'Layer 2, the data link layer, moves frames between devices on one network by MAC address.', 'a1-d2-osi-2'),
+  n.hotspot('hs-l4', 'Which layer are TCP and UDP on?', 'osi', 'l4',
+    'Layer 4, the transport layer, provides end-to-end delivery using ports.', 'a1-d2-osi-4'),
+  n.hotspot('hs-l1', 'Which layer covers cables, connectors and voltages?', 'osi', 'l1',
+    'Layer 1, the physical layer, is the actual medium and its signals.', 'a1-d2-osi-1'),
+  // Topologies
+  n.hotspot('hs-star', 'Which topology fails completely for every device if its central device fails?', 'topologies', 'star',
+    'Every device in a star depends on the central switch. A single cable failing affects only one device.', 'a1-d2-topo-star'),
+  n.hotspot('hs-bus', 'Which topology needs terminators at each end of a single shared cable?', 'topologies', 'bus',
+    'A bus shares one backbone. Without terminators the signal reflects, and a break affects everyone.', 'a1-d2-topo-bus'),
+  n.hotspot('hs-mesh', 'Which topology links every device to every other device?', 'topologies', 'mesh',
+    'A full mesh gives the most redundancy, at the cost of n(n−1)/2 links.', 'a1-d2-topo-mesh'),
+  // Laptop
+  m.hotspot('hs-wifi', 'Which part connects to the two thin antenna wires that run up into the lid?', 'laptop', 'wifi',
+    'The Wi-Fi card. Reconnect its antenna wires when reassembling or the signal will be very weak.', 'a1-d1-lt-wifi'),
+  m.hotspot('hs-lt-cmos', 'Which part keeps the clock and settings when the laptop is fully drained?', 'laptop', 'cmos',
+    'The small CMOS coin cell on its own lead. A laptop that forgets the time when unplugged needs it replaced.', 'a1-d1-lt-cmos'),
+  m.hotspot('hs-battery', 'Which part should you disconnect or remove first before most laptop repairs?', 'laptop', 'battery',
+    'Working with the battery connected risks a short, so it comes out or is unplugged first.', 'a1-d1-lt-battery'),
+];
+
+export const A1_QUESTIONS: Question[] = [...MOBILE, ...NETWORK, ...HARDWARE, ...VIRT, ...TROUBLE, ...HOTSPOTS];
 export default A1_QUESTIONS;

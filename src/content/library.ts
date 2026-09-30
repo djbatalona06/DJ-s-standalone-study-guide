@@ -1,5 +1,6 @@
 import { A1_CARDS } from './aplus-core1';
 import { A2_CARDS } from './aplus-core2';
+import { DIAGRAM_CARDS } from './diagram-cards';
 import { CS50_CARDS } from './cs50';
 import { DOMAINS, TRACKS, domainsOf } from './index';
 import type { Card, TrackId } from './types';
@@ -11,7 +12,7 @@ import type { Card, TrackId } from './types';
  * module because the shell and the readiness maths need only their ids.
  * A+ decks join `CARDS` as they are written.
  */
-export const CARDS: Card[] = [...CS50_CARDS, ...A1_CARDS, ...A2_CARDS];
+export const CARDS: Card[] = [...CS50_CARDS, ...A1_CARDS, ...DIAGRAM_CARDS, ...A2_CARDS];
 
 export const CARD_BY_ID: ReadonlyMap<string, Card> = new Map(CARDS.map((card) => [card.id, card]));
 

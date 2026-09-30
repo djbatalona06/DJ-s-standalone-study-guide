@@ -118,15 +118,24 @@ export function TodayPage() {
         ))}
       </Panel>
 
-      {Object.values(DIAGRAMS).map((diagram) => (
-        <Panel key={diagram.id} title="Explore" id={`diagram-${diagram.id}`}>
-          <p className="font-semibold">{diagram.title}</p>
-          <p className="text-muted-foreground">{diagram.blurb}</p>
-          <Button asChild variant="secondary" className="mt-3 h-12 w-full">
-            <a href={href({ name: 'diagram', id: diagram.id })}>Open the {diagram.title.toLowerCase()}</a>
-          </Button>
-        </Panel>
-      ))}
+      <Panel title="Explore" id="diagrams">
+        <p className="text-muted-foreground">
+          Tap the parts, label them, or match names. Every part has a card.
+        </p>
+        <ul className="divide-y-2 divide-dashed divide-border">
+          {Object.values(DIAGRAMS).map((diagram) => (
+            <li key={diagram.id}>
+              <a
+                href={href({ name: 'diagram', id: diagram.id })}
+                className="flex min-h-12 items-center justify-between gap-3 py-3 text-(--color-accent) underline-offset-4 hover:underline"
+              >
+                <span>{diagram.title}</span>
+                <span className="text-sm text-muted-foreground">{diagram.parts.length} parts</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Panel>
 
       <Panel title="HeartBeat XP" id="xp">
         {settings.linkState === 'unlinked' && (

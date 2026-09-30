@@ -1,4 +1,6 @@
-import type { McqQuestion, MatchQuestion, MultiQuestion, OrderQuestion, Provenance } from '../types';
+import { DIAGRAMS } from '../diagrams';
+import type { Diagram } from '../diagrams';
+import type { HotspotQuestion, McqQuestion, MatchQuestion, MultiQuestion, OrderQuestion, Provenance } from '../types';
 
 /**
  * Small builders so a bank reads as content, not plumbing. Every question is
@@ -23,5 +25,12 @@ export function questionBuilders(domainId: string, provenance: Provenance = 'obj
       id: id(slug), domainId, type: 'match', prompt,
       pairs: pairs.map(([term, definition]) => ({ term, definition })), explanation, provenance, cardId,
     }),
+    /** Pick a part of a diagram. Throws at load if the part is not there, so a typo fails the tests, not a learner. */
+    hotspot: (slug: string, prompt: string, diagramId: string, partId: string, explanation: string, cardId?: string): HotspotQuestion => {
+      const diagram = (DIAGRAMS as Record<string, Diagram>)[diagramId];
+      const answer = diagram ? diagram.parts.findIndex((part) => part.id === partId) : -1;
+      if (answer < 0) throw new Error(`hotspot ${slug}: no part ${partId} in diagram ${diagramId}`);
+      return { id: id(slug), domainId, type: 'hotspot', prompt, diagramId, answer, explanation, provenance, cardId };
+    },
   };
 }
