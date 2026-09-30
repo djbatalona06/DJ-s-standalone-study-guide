@@ -9,7 +9,7 @@ import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
 import { go } from '@/app/useRoute';
 import { DIAGRAMS } from '@/content/diagrams';
-import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf, type TrackId } from '@/content';
+import { TRACKS, domainsOf, type TrackId } from '@/content';
 import { db } from '@/db/database';
 import { flushOutbox } from '@/db/repository';
 import { buildQueue } from '@/domain/srs/queue';
@@ -17,6 +17,7 @@ import { readiness } from '@/domain/mastery/readiness';
 import { streak } from '@/domain/streak';
 import { XP_DAILY_CAP } from '@/domain/xp/kinds';
 import { useQuizAccuracy, useSettings, useStates, useStudyDays, useToday } from '../useApp';
+import { useLibrary } from '../useLibrary';
 
 function greeting(hour: number): string {
   if (hour < 5) return 'Up late';
@@ -29,6 +30,7 @@ export function TodayPage() {
   const settings = useSettings();
   const day = useToday();
   const states = useStates();
+  const library = useLibrary();
   const quiz = useQuizAccuracy();
   const studied = useStudyDays();
   const pending = useLiveQuery(async () => {
@@ -42,18 +44,18 @@ export function TodayPage() {
     return rows.reduce((n, row) => n + (row?.xp ?? 0), 0);
   }, [day]);
 
-  if (!states || !quiz || introduced === undefined || !studied) {
+  if (!library || !states || !quiz || introduced === undefined || !studied) {
     return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
   }
 
   const days = streak(studied, day);
   const name = settings.characterName || 'You';
-  const tracks = TRACKS.filter((t) => settings.tracks.includes(t.id) && cardsOfTrack(t.id).length > 0);
+  const tracks = TRACKS.filter((t) => settings.tracks.includes(t.id) && library.cardsOfTrack(t.id).length > 0);
   const rows = tracks.map((track) => {
-    const ids = cardsOfTrack(track.id).map((card) => card.id);
+    const ids = library.cardsOfTrack(track.id).map((card) => card.id);
     const queue = buildQueue(ids, states, day, { newPerDay: settings.newPerDay, introducedToday: introduced });
     const ready = readiness(
-      domainsOf(track.id).map((d) => ({ id: d.id, weight: d.weight, cardIds: cardsOfDomain(d.id).map((c) => c.id) })),
+      domainsOf(track.id).map((d) => ({ id: d.id, weight: d.weight, cardIds: library.cardsOfDomain(d.id).map((c) => c.id) })),
       states,
       quiz,
     );

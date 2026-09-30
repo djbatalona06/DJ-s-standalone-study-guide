@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/8bit/progress';
 import { Panel } from '@/components/Panel';
 import { intervalLabel, previewIntervals } from '@/domain/srs/preview';
 import { useSettings, useStates } from '../useApp';
-import { CARD_BY_ID, cardsOfTrack, type Card, type TrackId } from '../../content';
+import { useLibrary } from '../useLibrary';
+import { loadLibrary, type Card, type TrackId } from '../../content';
 import type { SessionRow } from '../../db/database';
 import {
   finishSession, flushOutbox, getSettings, gradeCard, introducedOn, loadStates, startSession,
@@ -43,6 +44,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
   const [fault, setFault] = useState<string | null>(null);
 
   const states = useStates();
+  const library = useLibrary();
   const { characterName } = useSettings();
   const session = useRef<SessionRow | null>(null);
   const day = useRef('');
@@ -55,8 +57,8 @@ export function ReviewSession({ trackId, onExit }: Props) {
       try {
         const settings = await getSettings();
         const today = todayKey(settings.timeZone);
-        const [states, introduced] = await Promise.all([loadStates(), introducedOn(today)]);
-        const ids = cardsOfTrack(trackId).map((card) => card.id);
+        const [states, introduced, lib] = await Promise.all([loadStates(), introducedOn(today), loadLibrary()]);
+        const ids = lib.cardsOfTrack(trackId).map((card) => card.id);
         const built = buildQueue(ids, states, today, {
           newPerDay: settings.newPerDay,
           introducedToday: introduced,
@@ -143,7 +145,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
     );
   }
 
-  if (!queue) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
+  if (!queue || !library) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
   if (done) {
     const accuracy = tally.reviewed ? Math.round((tally.correct / tally.reviewed) * 100) : 0;
@@ -172,7 +174,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
     );
   }
 
-  const card: Card | undefined = CARD_BY_ID.get(queue[index]);
+  const card: Card | undefined = library.CARD_BY_ID.get(queue[index]);
   if (!card) {
     // A card id that left the bundle: skip it rather than stall the session.
     void grade('good');
