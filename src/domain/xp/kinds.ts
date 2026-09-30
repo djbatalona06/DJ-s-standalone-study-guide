@@ -34,6 +34,10 @@ export const KIND_FOR = {
   exam: 'weekly',
   matching: 'match',
   diagram: 'anatomy',
+  // HeartBeat rejects kinds it does not know, so these borrow an existing one until it accepts
+  // `battle`. Change the value here, nowhere else, when it does.
+  study: 'deck',
+  battle: 'match',
 } as const satisfies Record<string, XpKind>;
 
 export type SessionMode = keyof typeof KIND_FOR;

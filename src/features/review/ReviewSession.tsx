@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { Check, Minus, X } from 'lucide-react';
 import { Button } from '@/components/ui/8bit/button';
+import { Input } from '@/components/ui/8bit/input';
 import { Kbd } from '@/components/ui/8bit/kbd';
 import { Progress } from '@/components/ui/8bit/progress';
+import { Switch } from '@/components/ui/8bit/switch';
 import { Panel } from '@/components/Panel';
 import { intervalLabel, previewIntervals } from '@/domain/srs/preview';
 import { useSettings, useStates } from '../useApp';
@@ -10,10 +12,11 @@ import { useLibrary } from '../useLibrary';
 import { loadLibrary, type Card, type TrackId } from '../../content';
 import type { SessionRow } from '../../db/database';
 import {
-  finishSession, flushOutbox, getSettings, gradeCard, introducedOn, loadStates, startSession,
+  finishSession, flushOutbox, getSettings, gradeCard, introducedOn, loadStates, saveSettings, startSession,
   type FlushSummary,
 } from '../../db/repository';
 import { todayKey } from '../../domain/day';
+import { checkTyped, suggestedGrade, type Checked } from '../../domain/recall/check';
 import { buildQueue, requeue } from '../../domain/srs/queue';
 import { GRADES, type Grade } from '../../domain/srs/srs';
 import { Character } from '../Character';
@@ -30,6 +33,7 @@ interface Tally {
   activeMs: number;
 }
 
+const VERDICT_TEXT = { correct: 'Correct', close: 'Close', wrong: 'Not quite' } as const;
 const GRADE_LABEL: Record<Grade, string> = { again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy' };
 /** A card left open for an hour is not an hour of study. */
 const MAX_CARD_MS = 60_000;
@@ -44,7 +48,9 @@ export function ReviewSession({ trackId, onExit }: Props) {
 
   const states = useStates();
   const library = useLibrary();
-  const { characterName } = useSettings();
+  const { characterName, recallMode } = useSettings();
+  const [typed, setTyped] = useState('');
+  const [checked, setChecked] = useState<Checked | null>(null);
   const session = useRef<SessionRow | null>(null);
   const day = useRef('');
   const shownAt = useRef(0);
@@ -106,6 +112,8 @@ export function ReviewSession({ trackId, onExit }: Props) {
       setQueue(nextQueue);
       setIndex(nextIndex);
       setRevealed(false);
+      setTyped('');
+      setChecked(null);
       shownAt.current = Date.now();
       if (nextIndex >= nextQueue.length) await finish(next);
     } catch (error) {
@@ -118,6 +126,8 @@ export function ReviewSession({ trackId, onExit }: Props) {
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (!queue || done || fault) return;
+      // Space and Enter belong to the typing box while it has focus.
+      if (event.target instanceof HTMLInputElement) return;
       if (!revealed) {
         if (event.key === ' ' || event.key === 'Enter') {
           event.preventDefault();
@@ -198,6 +208,11 @@ export function ReviewSession({ trackId, onExit }: Props) {
         <p className="font-pixel text-xs" aria-live="polite">{index + 1}/{queue.length}</p>
       </header>
 
+      <div className="mb-3 flex items-center justify-end gap-3 text-sm">
+        <label htmlFor="recall-mode">Type answers</label>
+        <Switch id="recall-mode" checked={recallMode} onCheckedChange={(on) => void saveSettings({ recallMode: on })} />
+      </div>
+
       <Panel className="min-h-64">
         <p className="font-pixel text-[0.625rem] uppercase text-muted-foreground">Question</p>
         <p className="text-xl font-semibold leading-snug">{card.front}</p>
@@ -207,6 +222,35 @@ export function ReviewSession({ trackId, onExit }: Props) {
             <p className="text-lg">{card.back}</p>
             <p className="mt-3 border-t-2 border-dashed border-border pt-3 text-muted-foreground">{card.why}</p>
           </>
+        ) : recallMode ? (
+          <form id="recall-form" className="mt-4" onSubmit={(e) => {
+            e.preventDefault();
+            setChecked(checkTyped(typed, card.back));
+            setRevealed(true);
+          }}>
+            <label htmlFor="recall-input" className="mb-2 block text-sm font-semibold">Type the answer</label>
+            <Input
+              id="recall-input"
+              font="normal"
+              className="h-12 text-base"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              autoFocus
+            />
+          </form>
+        ) : null}
+        {revealed && checked ? (
+          <p role="status" className="mt-3 flex items-start gap-2 border-t-2 border-dashed border-border pt-3">
+            {checked.verdict === 'wrong' ? <X aria-hidden="true" className="mt-1 size-4 shrink-0" /> : checked.verdict === 'close' ? <Minus aria-hidden="true" className="mt-1 size-4 shrink-0" /> : <Check aria-hidden="true" className="mt-1 size-4 shrink-0" />}
+            <span>
+              <strong>{VERDICT_TEXT[checked.verdict]}.</strong>
+              {checked.missing.length > 0 ? ` Missing: ${checked.missing.join(', ')}.` : ' You covered every key word.'}
+              {` Suggested: ${GRADE_LABEL[suggestedGrade(checked.verdict)]}. You choose the grade.`}
+            </span>
+          </p>
         ) : null}
       </Panel>
 
@@ -216,7 +260,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
             {GRADES.map((value, i) => (
               <Button
                 key={value}
-                variant={value === 'good' ? 'default' : 'secondary'}
+                variant={value === (checked ? suggestedGrade(checked.verdict) : 'good') ? 'default' : 'secondary'}
                 className="flex h-16 flex-col gap-1 px-1"
                 onClick={() => void grade(value)}
                 aria-label={`${GRADE_LABEL[value]}, next in ${intervalLabel(preview[value])}`}
@@ -226,6 +270,11 @@ export function ReviewSession({ trackId, onExit }: Props) {
                 <Kbd className="hidden min-[900px]:inline-flex" aria-hidden="true">{i + 1}</Kbd>
               </Button>
             ))}
+          </div>
+        ) : recallMode ? (
+          <div className="grid grid-cols-[1fr_auto] gap-3">
+            <Button type="submit" form="recall-form" className="h-14" disabled={!typed.trim()}>Check answer</Button>
+            <Button type="button" variant="secondary" className="h-14" onClick={() => { setChecked(null); setRevealed(true); }}>Show answer</Button>
           </div>
         ) : (
           <Button className="h-14 w-full" onClick={() => setRevealed(true)}>

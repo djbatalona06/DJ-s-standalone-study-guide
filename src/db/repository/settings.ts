@@ -16,6 +16,7 @@ export function defaultSettings(): SettingsRow {
     tracks: ['cs50', 'a1'],
     calm: false,
     textSize: 'default',
+    recallMode: false,
     schemaVersion: SCHEMA_VERSION,
   };
 }

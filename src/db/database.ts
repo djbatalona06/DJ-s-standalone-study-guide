@@ -94,6 +94,8 @@ export interface SettingsRow {
   /** No motion anywhere, same information. The system's reduced-motion setting also turns it on. */
   calm: boolean;
   textSize: TextSize;
+  /** Review asks you to type the answer before it is revealed. */
+  recallMode: boolean;
   /** Set when onboarding finishes. Missing means the welcome screen still runs. */
   onboardedAt?: number;
   schemaVersion: number;
