@@ -18,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 141 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
+npm test           # 142 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -53,13 +53,16 @@ npm run build
   Open it from any track or domain in Learn, or from the motherboard. Browsing is not graded;
   Review is where cards get scheduled.
 - **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
-  then check), and a list view (`L`). Fully keyboard-operable. 15 new A+ Core 1 cards.
+  then check), and a list view (`L`). Fully keyboard-operable.
+- **A+ Core 1 deck:** 110 original cards across all five domains (Mobile 15, Networking 25,
+  Hardware 30 including the 15 motherboard cards, Virtualization/Cloud 12, Troubleshooting 28),
+  written from the 220-1201 objectives as an outline, each with a why and a hint.
 - **Installable and offline:** a service worker precaches the app; diagram art is cached
   the first time you open it.
 
 ## What is not built yet
 
-Match mode and more diagrams, quizzes and exams, the rest of the A+ decks, the career pathway
+Match mode and more diagrams, quizzes and exams, Core 2 cards, the career pathway
 (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel
