@@ -100,8 +100,49 @@ const specialize = stage([...HEADSET, ...BADGE]);
 const sysadmin = stage([...HEADSET, ...BADGE, ...PROMPT]);
 const cloud = stage([...HEADSET, ...BADGE, ...PROMPT, ...CLOUDS]);
 
+/** The battle bot: an original little robot, blinking its antenna. Two frames, like the character. */
+const BOT = {
+  'bot-idle-a': [
+    '................',
+    '.......aa.......',
+    '.......oo.......',
+    '...oooooooooo...',
+    '..ommmmmmmmmmo..',
+    '..omllllllllmo..',
+    '..omlaallaalmo..',
+    '..omllllllllmo..',
+    '..ommmmmmmmmmo..',
+    '...oooooooooo...',
+    '..oommmmmmmmoo..',
+    '.ommommmmmmommo.',
+    '.ommommaammommo.',
+    '.ommommmmmmommo.',
+    '..ooo.oooooo.ooo',
+    '................',
+  ],
+  'bot-idle-b': [
+    '................',
+    '.......ll.......',
+    '.......oo.......',
+    '...oooooooooo...',
+    '..ommmmmmmmmmo..',
+    '..omllllllllmo..',
+    '..omlllaalllmo..',
+    '..omllllllllmo..',
+    '..ommmmmmmmmmo..',
+    '...oooooooooo...',
+    '..oommmmmmmmoo..',
+    '.ommommmmmmommo.',
+    '.ommommaammommo.',
+    '.ommommmmmmommo.',
+    '..ooo.oooooo.ooo',
+    '................',
+  ],
+} satisfies Record<string, Sprite>;
+
 export const SPRITES = {
   ...FOUNDATIONS,
+  ...BOT,
   'helpdesk-idle-a': helpDesk.a, 'helpdesk-idle-b': helpDesk.b,
   'specialize-idle-a': specialize.a, 'specialize-idle-b': specialize.b,
   'sysadmin-idle-a': sysadmin.a, 'sysadmin-idle-b': sysadmin.b,
@@ -109,6 +150,8 @@ export const SPRITES = {
 } satisfies Record<string, Sprite>;
 
 export type SpriteKey = keyof typeof SPRITES;
+
+export const BOT_FRAMES: SpriteKey[] = ['bot-idle-a', 'bot-idle-b'];
 
 /** The stages of the career path, in order. */
 export const STAGES = ['Foundations', 'Help desk', 'Specialize', 'Sysadmin', 'Cloud'] as const;

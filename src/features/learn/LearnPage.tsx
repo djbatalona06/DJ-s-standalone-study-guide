@@ -111,6 +111,9 @@ export function LearnPage() {
                 <Button asChild variant="secondary" className="h-12">
                   <a href={href({ name: 'flashcards', deck: track.id })}>Flashcards</a>
                 </Button>
+                <Button variant="secondary" className="h-12" onClick={() => go({ name: 'battle', track: track.id })}>
+                  Battle the bot
+                </Button>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
