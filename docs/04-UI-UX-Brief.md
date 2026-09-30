@@ -16,6 +16,21 @@
 - Motion: short (≤ 200 ms) reveals and slides. Everything animated has a `prefers-reduced-motion` and calm-mode static equivalent.
 - Illustration: original SVG only (see the TRD). Style: flat shapes, 2 px outlines, one accent per diagram, labels in the UI font.
 
+### 2a. The 8-bit terminal theme
+
+- **Components:** [8bitcn/ui](https://www.8bitcn.com/) ([source](https://github.com/TheOrcDev/8bitcn-ui), MIT), a retro set built on shadcn/ui. The copies live in `src/components/ui/8bit/`, so we own and edit them.
+- **Mood:** HeartBeat's token names, a shade darker: "terminal after dark". The base is near-black green, surfaces are dark green, the accent is phosphor green, and **lantern amber is kept for XP**. The light palette is the same room with the lights on. No pure black or white.
+- **Type:** Press Start 2P (the pixel face) for page titles, section labels, numbers and buttons. Outfit (HeartBeat's body face) for everything you read. Never set a paragraph in the pixel face.
+- **Texture:** stepped pixel borders on cards, bars and buttons (8bitcn). A faint static scanline over the dark palette. A blinking `_` cursor after page titles, stopped by reduced motion.
+- **Guardrail:** colours live in `src/theme/palette.ts`; `contrast.test.ts` checks every text pair (4.5:1) and UI pair (3:1) in both modes, and that `styles.css` matches.
+
+### 2b. The character
+
+- One original 8-bit character: a hacker working his way through the roles, from help desk to sysadmin to cloud. **The learner names him** at onboarding (Me can rename him). Nothing in the code or the copy gives him a default name.
+- Drawn in code as a 16×16 grid of role characters (`src/art/sprites.ts`, HeartBeat's sprite format), so he recolours with the theme and there is no image to license.
+- **Stages** follow the career path: Foundations (hoodie, laptop) → Help desk (headset) → Specialize → Sysadmin → Cloud. Only Foundations is drawn so far; the others come with the Path screen.
+- **Where he appears:** onboarding, the Today header (greeting, level, stage), the end of a review, empty states. He idles (typing) but never cheers on every tap: XP stays quiet (§1).
+
 ## 3. Key components
 
 | Component | Notes |

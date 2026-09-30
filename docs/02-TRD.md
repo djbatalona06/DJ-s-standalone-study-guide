@@ -12,8 +12,13 @@
 | Hosting | Cloudflare Pages (static) | The study app needs **no backend of its own** in v1. |
 | Backend | None. Talks to HeartBeat's `POST /api/study/session` only | Keeps the free-tier surface small. |
 | CI | typecheck, test, build, Lighthouse | Mirror HeartBeat's gates; do not add a visual-regression gate until baselines exist. |
+| UI kit | Tailwind CSS v4 + shadcn/ui + [8bitcn/ui](https://www.8bitcn.com/) (Radix underneath) | The 8-bit look (UI brief §2a). Components are copied into `src/components/ui/`, so we own them. |
+| Fonts | Press Start 2P + Outfit via `@fontsource` | Bundled, so offline works and no third party sees a request. |
+| Offline / install | `vite-plugin-pwa` (Workbox `generateSW`) | Precaches the app shell; diagram art is cached on first use. |
 
 Package manager: npm. Node LTS.
+
+**Why Lantern uses Tailwind when HeartBeat does not.** HeartBeat's `docs/TAILWIND.md` rejects Tailwind because its themes are CSS custom properties written at runtime, and Tailwind resolves at build time. Lantern keeps the same rule, that every colour is a token, and still uses Tailwind: `styles.css` defines HeartBeat's token names, points shadcn's variables (`--background`, `--primary`, `--ring`, …) at them, and maps those into Tailwind with `@theme inline`. A utility like `bg-primary` then compiles to `var(--primary)` and follows the palette. Components still never name a colour. The cost is the one TAILWIND.md warns about: two vocabularies (`--color-accent` is our brand accent; shadcn's `bg-accent` is a hover background). Custom colours use Tailwind's variable syntax, e.g. `text-(--color-xp)`.
 
 ## 2. Architecture
 
