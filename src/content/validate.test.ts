@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS, DOMAINS, TRACKS, cardsOfTrack, deckById, domainsOf } from './index';
+import { DOMAINS, TRACKS, domainsOf } from './index';
+import { CARDS, cardsOfTrack, deckById } from './library';
 import { validateContent, validateDiagram, validateQuestions } from './validate';
 import { TRACKS_WITH_QUESTIONS, loadBank } from './questions';
 import type { Question } from './types';
@@ -152,6 +153,14 @@ describe('the shipped questions', () => {
     const bank = await loadBank('a1');
     for (const domain of domainsOf('a1')) {
       expect(bank.filter((q) => q.domainId === domain.id).length).toBeGreaterThanOrEqual(8);
+    }
+    for (const type of ['mcq', 'multi', 'order', 'match']) expect(bank.some((q) => q.type === type)).toBe(true);
+  });
+
+  it('cover every Core 2 domain, in roughly the proportion of the exam', async () => {
+    const bank = await loadBank('a2');
+    for (const domain of domainsOf('a2')) {
+      expect(bank.filter((q) => q.domainId === domain.id).length).toBeGreaterThanOrEqual(15);
     }
     for (const type of ['mcq', 'multi', 'order', 'match']) expect(bank.some((q) => q.type === type)).toBe(true);
   });

@@ -91,7 +91,8 @@ DoD: two full practice exams per core can be completed and reviewed; readiness u
 - Storage: Dexie schema 2 adds `quizAnswers` and `exams`; an exam is saved on every change and resumes after a reload; finishing is one transaction (answers, score, queued XP) and safe to call twice. Backups carry answers and finished exams.
 - Screens: Quick quiz per domain/track, Practice exam (intro/resume, runner with flags and question list, results with every miss explained). Verified in headless Chromium at 390 px: full flow, timer pause while hidden, reload-resume, strict CSP with no violations, axe clean in light and dark.
 - 71 Core 1 questions (Mobile 10, Networking 17, Hardware 16, Virtualization 9, Troubleshooting 19). The exam scales to the bank, so it reaches the full 90 questions in 90 minutes once the bank does; grow it toward 150+ so two exams stay mostly fresh.
-- Not yet: hotspot questions (need more diagrams), a lightweight PBQ beyond ordering and matching, Core 2.
+- Core 2 (Phase 3 task 5): 128 cards and 81 questions across all four domains, all `objective-outline`. The card library moved into a lazy chunk (`content/library.ts`) when Core 2 pushed the initial JS to 154 kB; it is now 118 kB against the 150 kB budget.
+- Not yet: hotspot questions (need more diagrams), a lightweight PBQ beyond ordering and matching, more Core 2 questions for two fresh exams.
 
 ## Phase 4 — Career pathway (M)
 

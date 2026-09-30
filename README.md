@@ -58,6 +58,9 @@ The same three checks run on every pull request and push to `main` in GitHub Act
 - **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
   then check), Match (each pair is checked at once; right ones lock, first tries are scored),
   and a list view (`L`). Fully keyboard-operable.
+- **A+ Core 2 deck:** 128 original cards across Operating systems (38), Security (35), Software
+  troubleshooting (25) and Operational procedures (30), each with a why and a hint, plus 81 practice
+  questions. Written from the 220-1202 objectives as an outline.
 - **A+ Core 1 deck:** 110 original cards across all five domains (Mobile 15, Networking 25,
   Hardware 30 including the 15 motherboard cards, Virtualization/Cloud 12, Troubleshooting 28),
   written from the 220-1201 objectives as an outline, each with a why and a hint.
@@ -72,17 +75,19 @@ The same three checks run on every pull request and push to `main` in GitHub Act
 - **Quick quiz** per domain or track (10 questions: unseen first, then last-missed, then last-right).
   Sessions of 5+ answers earn a `quiz` credit in HeartBeat.
 - **Practice exam** per track: questions follow the exam's domain weights and favour ones you have not
-  asked yet. It scales down with the bank (71 Core 1 questions today, so 71 questions in 71 minutes) and becomes
+  asked yet. It scales down with the bank (71 Core 1 and 81 Core 2 questions today, so 71 and 81 minutes) and becomes
   the real 90 in 90 as the bank grows. The clock stops while the tab is hidden, flags and a question list
   work, and a reload resumes where you were. Submitting earns a `weekly` credit and shows domain scores
   and every miss with its explanation.
 - **Readiness** now blends recent quiz accuracy with card recall, and Learn shows the booking rule
   (readiness and your last two exams at 85%).
-- Question banks are their own chunk (`src/content/questions/`), loaded only when you open a quiz.
+- Question banks are their own chunk (`src/content/questions/`), loaded only when you open a quiz. The card
+  library is a lazy chunk too (`src/content/library.ts`, read through `useLibrary`), which keeps the initial
+  JavaScript near 118 kB gzip against the 150 kB budget.
 
 ## What is not built yet
 
-More diagrams, Core 2 cards and questions, more CS50 cards (weeks 6–9), hotspot questions, the career
+More diagrams, more CS50 cards (weeks 6–9), hotspot questions, the career
 pathway (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel

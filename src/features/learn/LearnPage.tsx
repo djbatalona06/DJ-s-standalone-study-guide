@@ -6,19 +6,20 @@ import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
 import { go } from '@/app/useRoute';
 import { diagramsOf } from '@/content/diagrams';
-import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf, type TrackId } from '@/content';
+import { TRACKS, domainsOf, type Library, type TrackId } from '@/content';
 import type { CardState } from '@/domain/srs/srs';
 import { TRACKS_WITH_QUESTIONS } from '@/content/questions';
 import { bookingAdvice } from '@/domain/mastery/booking';
 import { domainMastery, readiness } from '@/domain/mastery/readiness';
 import { useQuizAccuracy, useRecentExams, useStates } from '../useApp';
+import { useLibrary } from '../useLibrary';
 
 /** Every track's hooks in one component, so the page can map over tracks without hooks in a loop. */
-function Booking({ trackId, states, quiz }: { trackId: TrackId; states: Map<string, CardState>; quiz: Map<string, number> }) {
+function Booking({ trackId, states, quiz, library }: { trackId: TrackId; states: Map<string, CardState>; quiz: Map<string, number>; library: Library }) {
   const exams = useRecentExams(trackId);
   if (!exams) return null;
   const ready = readiness(
-    domainsOf(trackId).map((d) => ({ id: d.id, weight: d.weight, cardIds: cardsOfDomain(d.id).map((c) => c.id) })),
+    domainsOf(trackId).map((d) => ({ id: d.id, weight: d.weight, cardIds: library.cardsOfDomain(d.id).map((c) => c.id) })),
     states,
     quiz,
   ).readiness;
@@ -28,14 +29,15 @@ function Booking({ trackId, states, quiz }: { trackId: TrackId; states: Map<stri
 export function LearnPage() {
   const states = useStates();
   const quiz = useQuizAccuracy();
-  if (!states || !quiz) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
+  const library = useLibrary();
+  if (!states || !quiz || !library) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
   return (
     <>
       <PageHead title="Learn" sub="Three tracks. Domains follow the exam's own outline, weighted as the exam weights them." />
 
       {TRACKS.map((track) => {
-        const hasCards = cardsOfTrack(track.id).length > 0;
+        const hasCards = library.cardsOfTrack(track.id).length > 0;
         return (
           <Panel key={track.id} id={`t-${track.id}`} title={track.title}>
             <p className="text-sm text-muted-foreground">
@@ -45,7 +47,7 @@ export function LearnPage() {
             </p>
             <ul className="divide-y-2 divide-dashed divide-border">
               {domainsOf(track.id).map((domain) => {
-                const cards = cardsOfDomain(domain.id);
+                const cards = library.cardsOfDomain(domain.id);
                 const mastery = domainMastery(
                   { id: domain.id, weight: domain.weight, cardIds: cards.map((c) => c.id) },
                   states,
@@ -97,7 +99,7 @@ export function LearnPage() {
                 );
               })}
             </ul>
-            {track.exam && TRACKS_WITH_QUESTIONS.includes(track.id) ? <Booking trackId={track.id} states={states} quiz={quiz} /> : null}
+            {track.exam && TRACKS_WITH_QUESTIONS.includes(track.id) ? <Booking trackId={track.id} states={states} quiz={quiz} library={library} /> : null}
             {TRACKS_WITH_QUESTIONS.includes(track.id) ? (
               <div className="mt-2 grid gap-4 sm:grid-cols-2">
                 <Button asChild variant="secondary" className="h-12"><a href={href({ name: 'quiz', scope: track.id })}>Quick quiz</a></Button>

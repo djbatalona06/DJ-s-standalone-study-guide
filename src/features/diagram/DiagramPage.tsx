@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { PageHead } from '@/components/Shell';
 import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
-import { CARD_BY_ID } from '@/content';
+import { CARD_BY_ID } from '@/content/library';
 import { DIAGRAM_ART, diagramById, type Diagram, type DiagramArt, type DiagramId } from '@/content/diagrams';
 import { finishSession, flushOutbox, getSettings, startSession } from '@/db/repository';
 import { todayKey } from '@/domain/day';

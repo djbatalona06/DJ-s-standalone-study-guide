@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/8bit/input';
 import { Switch } from '@/components/ui/8bit/switch';
 import { Panel } from '@/components/Panel';
 import { go } from '@/app/useRoute';
-import { TRACKS, cardsOfTrack, type TrackId } from '@/content';
+import { TRACKS, type TrackId } from '@/content';
+import { useLibrary } from '../useLibrary';
 import { MAX_CHARACTER_NAME, cleanCharacterName, linkHeartBeat, saveSettings } from '@/db/repository';
 import { useSettings } from '../useApp';
 
@@ -18,6 +19,7 @@ type Step = 'name' | 'tracks' | 'link';
  */
 export function WelcomePage() {
   const settings = useSettings();
+  const library = useLibrary();
   const [step, setStep] = useState<Step>('name');
   const [name, setName] = useState(settings.characterName);
   const [tracks, setTracks] = useState<TrackId[]>(settings.tracks);
@@ -82,13 +84,13 @@ export function WelcomePage() {
           <ul className="my-2 divide-y divide-border">
             {TRACKS.map((track) => {
               const on = tracks.includes(track.id);
-              const count = cardsOfTrack(track.id).length;
+              const count = library?.cardsOfTrack(track.id).length;
               return (
                 <li key={track.id} className="flex min-h-12 items-center justify-between gap-4 py-3">
                   <label htmlFor={`track-${track.id}`} className="flex flex-col">
                     <span className="font-semibold">{track.title}</span>
                     <span className="text-sm text-muted-foreground">
-                      {count ? `${count} cards so far` : 'cards on the way'}
+                      {count === undefined ? '\u00a0' : count ? `${count} cards so far` : 'cards on the way'}
                     </span>
                   </label>
                   <Switch

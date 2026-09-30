@@ -6,7 +6,8 @@ import { Progress } from '@/components/ui/8bit/progress';
 import { PageHead } from '@/components/Shell';
 import { Panel } from '@/components/Panel';
 import { href } from '@/app/route';
-import { deckById } from '@/content';
+import type { Library } from '@/content';
+import { useLibrary } from '../useLibrary';
 import { DIAGRAMS } from '@/content/diagrams';
 import { shuffled, step } from '@/domain/flashcards';
 import { cn } from '@/lib/utils';
@@ -18,7 +19,13 @@ import { cn } from '@/lib/utils';
  * that.
  */
 export function FlashcardsPage({ deckId }: { deckId: string }) {
-  const deck = useMemo(() => deckById(deckId, Object.values(DIAGRAMS)), [deckId]);
+  const library = useLibrary();
+  if (!library) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
+  return <Flashcards deckId={deckId} library={library} />;
+}
+
+function Flashcards({ deckId, library }: { deckId: string; library: Library }) {
+  const deck = useMemo(() => library.deckById(deckId, Object.values(DIAGRAMS)), [library, deckId]);
   const [seed, setSeed] = useState<number | null>(null);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
