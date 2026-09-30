@@ -26,6 +26,13 @@ describe('the shipped content', () => {
     expect(cardsOfTrack('a1').every((c) => c.provenance === 'objective-outline')).toBe(true);
   });
 
+  it('covers every A+ Core 2 domain, written from the objectives as an outline', () => {
+    for (const domain of domainsOf('a2')) {
+      expect(CARDS.filter((c) => c.domainId === domain.id).length).toBeGreaterThanOrEqual(10);
+    }
+    expect(cardsOfTrack('a2').every((c) => c.provenance === 'objective-outline')).toBe(true);
+  });
+
   it('is all original wording: nothing copied from CS50 or an objectives PDF', () => {
     expect(CARDS.every((c) => c.provenance === 'original' || c.provenance === 'objective-outline')).toBe(true);
   });
