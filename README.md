@@ -26,6 +26,22 @@ npm run build
 The same three checks run on every pull request and push to `main` in GitHub Actions
 (`.github/workflows/ci.yml`); a red check means one of them failed.
 
+## Put it on your phone (Cloudflare Pages)
+
+Localhost only works on the computer running it, and a phone needs HTTPS to install a PWA.
+Cloudflare Pages gives you both, free, and rebuilds on every push to `main`.
+
+1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**, pick this repo.
+2. Build command `npm run build`, output directory `dist`. (`.node-version` pins Node 22.)
+3. Save and deploy. You get `https://<project>.pages.dev`.
+4. On your phone open that URL, then browser menu → **Add to Home Screen**.
+5. In HeartBeat Settings connect a study app, paste the token in Lantern's Me screen, finish 5+ cards,
+   and check HeartBeat shows one credit.
+
+`public/_headers` ships a strict Content-Security-Policy: scripts only from this origin, requests only
+to `https://heartbeat-eop.pages.dev`. If you use a different HeartBeat address in Me, add it to
+`connect-src` in that file, or syncing will quietly stay queued.
+
 ## What exists (Phase 1)
 
 - **Scheduler and queue** ported from HeartBeat's `domain/study/srs.ts`, same behaviour:
