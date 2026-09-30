@@ -79,6 +79,15 @@ export function validateDiagram(diagram: Diagram, cards: Card[], art?: DiagramAr
         problems.push(`part ${diagram.id}/${id} sits outside the 100x100 space`);
       }
     }
+    // Two parts sharing space would make one of them untappable.
+    const shapes = Object.entries(art.shapes);
+    for (const [i, [idA, a]] of shapes.entries()) {
+      for (const [idB, b] of shapes.slice(i + 1)) {
+        if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) {
+          problems.push(`parts ${diagram.id}/${idA} and ${idB} overlap`);
+        }
+      }
+    }
   }
   return problems;
 }
@@ -90,10 +99,16 @@ const unique = (items: readonly string[]) => new Set(items.map((x) => x.trim()))
  * check, it runs in the tests, so a broken answer key fails the build instead of
  * teaching somebody the wrong thing.
  */
-export function validateQuestions(domains: Domain[], cards: Card[], questions: Question[]): string[] {
+export function validateQuestions(
+  domains: Domain[],
+  cards: Card[],
+  questions: Question[],
+  diagrams: ReadonlyArray<Pick<Diagram, 'id' | 'parts'>> = [],
+): string[] {
   const problems: string[] = [];
   const domainIds = new Set(domains.map((d) => d.id));
   const cardIds = new Set(cards.map((c) => c.id));
+  const partCount = new Map(diagrams.map((d) => [d.id, d.parts.length]));
   const seen = new Set<string>();
 
   for (const q of questions) {
@@ -123,6 +138,10 @@ export function validateQuestions(domains: Domain[], cards: Card[], questions: Q
       if (q.pairs.length < 3) problems.push(`${at} has fewer than three pairs`);
       if (!unique(q.pairs.map((p) => p.term)) || !unique(q.pairs.map((p) => p.definition))) problems.push(`${at} has repeated terms or definitions`);
       if (q.pairs.some((p) => !p.term.trim() || !p.definition.trim())) problems.push(`${at} has a blank term or definition`);
+    } else if (q.type === 'hotspot') {
+      const parts = partCount.get(q.diagramId);
+      if (parts === undefined) problems.push(`${at} names a missing diagram ${q.diagramId}`);
+      else if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= parts) problems.push(`${at} has an answer outside its diagram’s parts`);
     } else {
       problems.push(`${at} has an unknown type`);
     }

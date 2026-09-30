@@ -10,6 +10,7 @@ import { permutation, shuffled } from './shuffle';
 const base = { domainId: 'd1', explanation: 'because', provenance: 'original' as const };
 const mcq: Question = { ...base, id: 'q-mcq', type: 'mcq', prompt: 'p', choices: ['a', 'b', 'c'], answer: 1 };
 const multi: Question = { ...base, id: 'q-multi', type: 'multi', prompt: 'p', choices: ['a', 'b', 'c', 'd'], answers: [0, 2] };
+const hotspot: Question = { ...base, id: 'q-hot', type: 'hotspot', prompt: 'p', diagramId: 'd', answer: 2 };
 const order: Question = { ...base, id: 'q-order', type: 'order', prompt: 'p', items: ['one', 'two', 'three'] };
 const match: Question = {
   ...base, id: 'q-match', type: 'match', prompt: 'p',
@@ -42,6 +43,14 @@ describe('scoring', () => {
     expect(isCorrect(multi, [0, 2, 3])).toBe(false);
     expect(isCorrect(multi, [0, 0])).toBe(false);
     expect(isCorrect(multi, [1, 3])).toBe(false);
+  });
+
+  it('a hotspot is right only on the one part', () => {
+    expect(isCorrect(hotspot, 2)).toBe(true);
+    expect(isCorrect(hotspot, 1)).toBe(false);
+    expect(isCorrect(hotspot, undefined)).toBe(false);
+    expect(isAnswered(hotspot, 0)).toBe(true);
+    expect(isAnswered(hotspot, -1)).toBe(false);
   });
 
   it('ordering needs every item in place', () => {

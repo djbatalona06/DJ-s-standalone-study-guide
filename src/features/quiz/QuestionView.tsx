@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/8bit/button';
 import { cn } from '@/lib/utils';
-import type { Answer, MatchQuestion, McqQuestion, MultiQuestion, OrderQuestion, Question } from '../../content/types';
+import { DIAGRAM_ART, diagramById, type DiagramArt, type DiagramId } from '../../content/diagrams';
+import type { Answer, HotspotQuestion, MatchQuestion, McqQuestion, MultiQuestion, OrderQuestion, Question } from '../../content/types';
 import { permutation } from '../../domain/quiz/shuffle';
 
 interface Props {
@@ -34,6 +36,7 @@ export function QuestionView({ q, seed, answer, onAnswer, reveal = false }: Prop
       {q.type === 'mcq' && <Mcq q={q} order={permutation(q.choices.length, key)} answer={answer} onAnswer={onAnswer} reveal={reveal} />}
       {q.type === 'multi' && <Multi q={q} order={permutation(q.choices.length, key)} answer={answer} onAnswer={onAnswer} reveal={reveal} />}
       {q.type === 'order' && <Order q={q} start={permutation(q.items.length, key, true)} answer={answer} onAnswer={onAnswer} reveal={reveal} />}
+      {q.type === 'hotspot' && <Hotspot q={q} answer={answer} onAnswer={onAnswer} reveal={reveal} />}
       {q.type === 'match' && <Match q={q} order={permutation(q.pairs.length, key)} answer={answer} onAnswer={onAnswer} reveal={reveal} />}
     </fieldset>
   );
@@ -167,6 +170,86 @@ function Match({ q, order, answer, onAnswer, reveal }: Common<MatchQuestion> & {
           );
         })}
       </ul>
+    </>
+  );
+}
+
+/**
+ * Pick a part of a diagram: tap it in the picture, or choose it by name below.
+ * Both routes set the same answer, so it works without sight. The picture shows
+ * no names (the prompt asks by function), and its art is a lazy chunk; if it
+ * cannot load, the list still works.
+ */
+function Hotspot({ q, answer, onAnswer, reveal }: Common<HotspotQuestion>) {
+  const diagram = diagramById(q.diagramId);
+  const [art, setArt] = useState<DiagramArt | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    const load = DIAGRAM_ART[q.diagramId as DiagramId];
+    if (!load) { setFailed(true); return; }
+    load().then((m) => { if (live) setArt(m.default); }).catch(() => { if (live) setFailed(true); });
+    return () => { live = false; };
+  }, [q.diagramId]);
+
+  if (!diagram) return <p role="alert">This picture is missing.</p>;
+  const chosen = typeof answer === 'number' ? answer : -1;
+  const selectId = `${q.id}-part`;
+
+  return (
+    <>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {art ? 'Tap the part in the picture, or choose it by name below.' : 'Choose the part by name.'}
+      </p>
+      {art ? (
+        <svg
+          viewBox={art.viewBox} role="group" aria-label={`${diagram.title}: ${diagram.parts.length} parts`}
+          className="mx-auto mb-4 block aspect-square h-auto w-full max-w-sm"
+        >
+          {art.decor.map((shape, i) => (
+            <path key={i} d={shape.d} fill={shape.fill ? 'var(--color-surface-muted)' : 'none'} stroke="var(--color-border)" strokeWidth={0.6} aria-hidden="true" />
+          ))}
+          {diagram.parts.map((part, i) => {
+            const r = art.shapes[part.id];
+            const picked = chosen === i;
+            const right = reveal && i === q.answer;
+            const wrong = reveal && picked && i !== q.answer;
+            return (
+              <g
+                key={part.id} role="button" tabIndex={reveal ? -1 : 0} aria-label={part.label} aria-pressed={picked}
+                aria-disabled={reveal} className={cn('outline-none', !reveal && 'cursor-pointer')}
+                onClick={() => { if (!reveal) onAnswer(i); }}
+                onKeyDown={(e) => { if (!reveal && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onAnswer(i); } }}
+              >
+                <rect
+                  x={r.x} y={r.y} width={r.w} height={r.h} rx={r.round ? r.w / 2 : 0.6}
+                  fill={picked || right ? 'color-mix(in srgb, var(--color-accent) 30%, var(--color-surface))' : 'var(--color-surface)'}
+                  stroke={wrong ? 'var(--color-danger)' : right || picked ? 'var(--color-accent)' : 'var(--color-text-muted)'}
+                  strokeWidth={right || wrong ? 1.6 : 0.8}
+                />
+                {right ? <text x={r.x + r.w / 2} y={r.y + r.h / 2} textAnchor="middle" dominantBaseline="central" fontSize={4} fill="var(--color-text)" aria-hidden="true">✓</text> : null}
+                {wrong ? <text x={r.x + r.w / 2} y={r.y + r.h / 2} textAnchor="middle" dominantBaseline="central" fontSize={4} fill="var(--color-text)" aria-hidden="true">✗</text> : null}
+              </g>
+            );
+          })}
+          <path d={art.detail.join(' ')} fill="none" stroke="var(--color-text-muted)" strokeWidth={0.35} pointerEvents="none" aria-hidden="true" />
+        </svg>
+      ) : failed ? <p role="alert" className="mb-3 text-(--color-danger)">The picture could not load.</p> : null}
+
+      <label htmlFor={selectId} className="mb-2 block font-semibold">{art ? 'Or choose by name' : 'Part'}</label>
+      <select
+        id={selectId} value={chosen} disabled={reveal} onChange={(e) => onAnswer(Number(e.target.value))}
+        className="h-12 w-full border-2 border-foreground bg-background px-2 text-foreground"
+      >
+        <option value={-1}>Choose…</option>
+        {diagram.parts.map((part, i) => <option key={part.id} value={i}>{part.label}</option>)}
+      </select>
+      {reveal ? (
+        chosen === q.answer
+          ? <Mark ok>{`Correct: ${diagram.parts[q.answer].label}`}</Mark>
+          : <Mark ok={false}>{`It is the ${diagram.parts[q.answer].label}`}</Mark>
+      ) : null}
     </>
   );
 }

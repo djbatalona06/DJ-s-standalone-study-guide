@@ -12,7 +12,7 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **SRS:** SM-2 port from HeartBeat `srs.ts`: ease starts 2.5, floor 1.3, ceiling 3; grades Again/Hard/Good/Easy; "again" = quality 2, returns the card today and dents ease (no reset).
 
-**Questions:** MCQ, multi-select (exact set), ordering and match are built; hotspot-on-diagram is not; explanation mandatory. **Exam:** built; scales to the bank up to 90 questions in 90 minutes; timer (`domain/quiz/clock.ts`) pauses when the tab is hidden; flags; saved on every change and resumes after a reload.
+**Questions:** MCQ, multi-select (exact set), ordering, match and hotspot-on-diagram are built; explanation mandatory. **Exam:** built; scales to the bank up to 90 questions in 90 minutes; timer (`domain/quiz/clock.ts`) pauses when the tab is hidden; flags; saved on every change and resumes after a reload.
 
 **Readiness** = Σ domain.weight × mastery(domain); mastery = 0.5 recall + 0.5 quiz accuracy (tunable). Book exam when readiness ≥ 85% and last two full exams ≥ 85% (personal rule).
 
@@ -22,9 +22,9 @@ Paste everything between the lines. Then say: "Here are my project documents. Us
 
 **Local tables:** cardState, reviewLog, quizAnswers, sessions (id = XP sessionId), mastery, pathProgress, userCards, syncQueue, settings (studyToken never exported), meta. Import merge: greater `lastReviewedAt` wins per card; logs union by id; never import the token.
 
-**Content so far:** CS50 99 cards (weeks 0–9); A+ Core 1 110 cards and 71 questions across all five domains; A+ Core 2 128 cards and 81 questions across all four. Cards live in one lazy chunk (`content/library.ts`, read via `useLibrary`); tracks and domains stay in `content/index.ts`. Question banks are lazy chunks in `src/content/questions/`, checked by `validateQuestions`; each question may name a `cardId` that a miss brings back today.
+**Content so far:** CS50 99 cards (weeks 0–9); A+ Core 1 175 cards (110 outline cards plus 65 diagram-part cards) and 109 questions across all five domains; A+ Core 2 128 cards and 81 questions across all four. Cards live in one lazy chunk (`content/library.ts`, read via `useLibrary`); tracks and domains stay in `content/index.ts`. Question banks are lazy chunks in `src/content/questions/`, checked by `validateQuestions`; each question may name a `cardId` that a miss brings back today.
 
-**UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Explore, Label, Match and list view built. Flashcards mode (`/flashcards/:deck`, Quizlet layout, not graded) with a required written `hint` on every card. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
+**UI:** tabs Today / Learn / Me now; Practice and Path join when they have content. Hash routes in `src/app/route.ts`. Diagrams: `Diagram` (names, cards, text alternative) in the main bundle, `DiagramArt` geometry as a lazy `diagram-*.js` chunk; Eleven diagrams (definitions in `content/diagrams/catalog.ts`, art in lazy `diagram-*.ts` chunks drawn with `draw.ts`); Explore, Label, Match and list view built. Flashcards mode (`/flashcards/:deck`, Quizlet layout, not graded) with a required written `hint` on every card. Diagrams: parts are real buttons, keyboard operable, every diagram has a list-view text alternative, tap-to-place labeling. Color never the only signal. Lazy diagram/exam chunks, out of the precache. Strict CSP. Quiet XP, no shaming.
 
 **Licensing:** original content only; CompTIA objectives as outline not text; never copy exam-dump questions; CS50 is CC BY-NC-SA 4.0 so write your own cards and link out; every card has `provenance`.
 

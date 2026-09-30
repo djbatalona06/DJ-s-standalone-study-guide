@@ -64,7 +64,7 @@ DoD: the motherboard diagram is fully usable with keyboard and screen reader; ax
 - Also added: Flashcards mode (Quizlet layout) and a written hint on all 58 cards; the validator requires hints and rejects ones that contain the answer.
 - Match mode (task 3): pick a name, pick a part, instant ✓/✗ with icon and text; right pairs lock, first-try matches are scored (`src/domain/diagram/match.ts`); finishing queues `match`. Verified at 390 and 1280 px, dark and light, axe clean, full keyboard-only walk.
 - Task 4: 110 Core 1 cards (Mobile 15, Networking 25, Hardware 30, Virtualization/Cloud 12, Troubleshooting 28), all `objective-outline` with a why and a hint; a test keeps every Core 1 domain at 10+ cards. Initial JS ≈ 137 kB gzip with them: split the decks into lazy chunks before Core 2 lands. Domain weights still not verified against CompTIA's page (unreachable from the build environment).
-- Next: the RAM-keying diagram; a headless keyboard test in CI.
+- Next: a headless keyboard test in CI.
 - CI: `.github/workflows/ci.yml` runs typecheck, tests and build on every PR and push to `main`.
 - Phase 1's CS50 gap is closed: 99 cards across weeks 0–9 (Python, SQL, HTML/CSS/JavaScript and Flask added). Domain weights are now one tenth each.
 
@@ -90,9 +90,11 @@ DoD: two full practice exams per core can be completed and reviewed; readiness u
 - Done: tasks 1–4 and 6 for Core 1. Question types mcq, multi (exact set), ordering and matching, with pure scoring, seeded shuffling, weighted exam building, a visibility-aware clock, and mastery/booking maths, all tested (`src/domain/quiz/`, `src/domain/mastery/`).
 - Storage: Dexie schema 2 adds `quizAnswers` and `exams`; an exam is saved on every change and resumes after a reload; finishing is one transaction (answers, score, queued XP) and safe to call twice. Backups carry answers and finished exams.
 - Screens: Quick quiz per domain/track, Practice exam (intro/resume, runner with flags and question list, results with every miss explained). Verified in headless Chromium at 390 px: full flow, timer pause while hidden, reload-resume, strict CSP with no violations, axe clean in light and dark.
-- 71 Core 1 questions (Mobile 10, Networking 17, Hardware 16, Virtualization 9, Troubleshooting 19). The exam scales to the bank, so it reaches the full 90 questions in 90 minutes once the bank does; grow it toward 150+ so two exams stay mostly fresh.
+- Core 1 now has 109 questions (71 written plus 38 hotspots), so its exam is the full 90 in 90 minutes. The exam scales to a smaller bank (Core 2: 81 in 81); grow banks toward 150+ so two exams stay mostly fresh.
 - Core 2 (Phase 3 task 5): 128 cards and 81 questions across all four domains, all `objective-outline`. The card library moved into a lazy chunk (`content/library.ts`) when Core 2 pushed the initial JS to 154 kB; it is now 118 kB against the 150 kB budget.
-- Not yet: hotspot questions (need more diagrams), a lightweight PBQ beyond ordering and matching, more Core 2 questions for two fresh exams.
+- Phase 2 task 2 is done: ten more diagrams after the motherboard (memory modules, storage, power supply, laser printer, ports, cables and fiber connectors, CPU cooling, inside a laptop, OSI model, topologies), 65 new part cards, art in lazy chunks, and a validator check that no two tappable parts overlap.
+- Hotspot questions (Phase 3 task 1): 38 for Core 1, one per key part, prompted by function so the by-name route tests the same thing as tapping. axe clean, CSP clean.
+- Not yet: a lightweight PBQ beyond ordering and matching, hotspots for Core 2 (its topics are not diagram-shaped), more Core 2 questions for two fresh exams.
 
 ## Phase 4 — Career pathway (M)
 

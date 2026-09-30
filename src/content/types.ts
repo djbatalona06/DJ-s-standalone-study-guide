@@ -77,12 +77,23 @@ export interface MatchQuestion extends QuestionBase {
   pairs: Array<{ term: string; definition: string }>;
 }
 
-export type Question = McqQuestion | MultiQuestion | OrderQuestion | MatchQuestion;
+/**
+ * Pick the right part of a diagram. `answer` indexes the diagram's `parts`. The
+ * prompt asks by what a part does, not what it is called, so choosing from a
+ * list by name (the non-visual route) still tests the same knowledge.
+ */
+export interface HotspotQuestion extends QuestionBase {
+  type: 'hotspot';
+  diagramId: string;
+  answer: number;
+}
+
+export type Question = McqQuestion | MultiQuestion | OrderQuestion | MatchQuestion | HotspotQuestion;
 
 /**
  * What a learner gave. Always in terms of the question's own (unshuffled)
  * indices, so scoring never needs to know how it was displayed.
- * mcq: the choice. multi: the chosen set. order: item indices in the learner's order.
+ * mcq: the choice. hotspot: the part. multi: the chosen set. order: item indices in the learner's order.
  * match: for each term, the index of the definition chosen (-1 for none).
  */
 export type Answer = number | number[];

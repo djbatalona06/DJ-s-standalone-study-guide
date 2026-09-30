@@ -4,7 +4,7 @@ import { CARDS, cardsOfTrack, deckById } from './library';
 import { validateContent, validateDiagram, validateQuestions } from './validate';
 import { TRACKS_WITH_QUESTIONS, loadBank } from './questions';
 import type { Question } from './types';
-import { DIAGRAMS, DIAGRAM_ART } from './diagrams';
+import { DIAGRAMS, DIAGRAM_ART, type Diagram, type DiagramArt } from './diagrams';
 import { CS50_CARDS } from './cs50';
 import type { Card } from './types';
 
@@ -59,6 +59,16 @@ describe('validateDiagram', () => {
     expect(validateDiagram(diagram, [card], {
       viewBox: '0 0 100 100', shapes: { p: { x: 0, y: 0, w: 10, h: 10 } }, decor: [], detail: [],
     })).toEqual([]);
+  });
+
+  it('catches parts that overlap, which would make one untappable', () => {
+    const d: Diagram = { ...diagram, parts: [
+      { id: 'a', label: 'A', cardId: 'a1-d3-x' }, { id: 'b', label: 'B', cardId: 'a1-d3-x' },
+    ] };
+    const overlapping: DiagramArt = { viewBox: '0 0 100 100', decor: [], detail: [], shapes: { a: { x: 0, y: 0, w: 10, h: 10 }, b: { x: 5, y: 5, w: 10, h: 10 } } };
+    const touching: DiagramArt = { ...overlapping, shapes: { a: { x: 0, y: 0, w: 10, h: 10 }, b: { x: 10, y: 0, w: 10, h: 10 } } };
+    expect(validateDiagram(d, [card], overlapping).join()).toContain('overlap');
+    expect(validateDiagram(d, [card], touching)).toEqual([]);
   });
 
   it('catches missing cards, repeats, missing words and stray shapes', () => {
@@ -145,7 +155,7 @@ describe('the shipped questions', () => {
     for (const track of TRACKS) {
       const bank = await loadBank(track.id);
       expect(bank.length > 0).toBe(TRACKS_WITH_QUESTIONS.includes(track.id));
-      expect(validateQuestions(DOMAINS, CARDS, bank)).toEqual([]);
+      expect(validateQuestions(DOMAINS, CARDS, bank, Object.values(DIAGRAMS))).toEqual([]);
     }
   });
 
@@ -154,7 +164,7 @@ describe('the shipped questions', () => {
     for (const domain of domainsOf('a1')) {
       expect(bank.filter((q) => q.domainId === domain.id).length).toBeGreaterThanOrEqual(8);
     }
-    for (const type of ['mcq', 'multi', 'order', 'match']) expect(bank.some((q) => q.type === type)).toBe(true);
+    for (const type of ['mcq', 'multi', 'order', 'match', 'hotspot']) expect(bank.some((q) => q.type === type)).toBe(true);
   });
 
   it('cover every Core 2 domain, in roughly the proportion of the exam', async () => {
@@ -191,6 +201,14 @@ describe('validateQuestions', () => {
     expect(validateQuestions(DOMAINS, CARDS, [ok, ok]).join()).toContain('duplicate question id');
   });
 
+  it('checks a hotspot against its diagram’s parts', () => {
+    const hot = { ...ok, type: 'hotspot', diagramId: 'd1', answer: 1 } as unknown as Question;
+    const diagrams = [{ id: 'd1', parts: [{ id: 'a', label: 'A', cardId: 'x' }, { id: 'b', label: 'B', cardId: 'x' }] }];
+    expect(validateQuestions(DOMAINS, CARDS, [hot], diagrams)).toEqual([]);
+    expect(validateQuestions(DOMAINS, CARDS, [{ ...hot, answer: 2 } as Question], diagrams).join()).toContain('outside its diagram');
+    expect(validateQuestions(DOMAINS, CARDS, [{ ...hot, diagramId: 'nope' } as Question], diagrams).join()).toContain('missing diagram');
+  });
+
   it('checks each type’s own shape', () => {
     const multi: Question = { ...ok, type: 'multi', choices: ['a', 'b', 'c'], answers: [0, 1] } as Question;
     expect(check(multi)).toEqual([]);
@@ -200,5 +218,16 @@ describe('validateQuestions', () => {
     expect(check({ ...ok, type: 'order', items: ['a', 'b'] } as unknown as Question).join()).toContain('fewer than three');
     const match = { ...ok, type: 'match', pairs: [{ term: 'a', definition: '1' }, { term: 'a', definition: '2' }, { term: 'c', definition: '3' }] };
     expect(check(match as unknown as Question).join()).toContain('repeated terms');
+  });
+});
+
+describe('question domains', () => {
+  it('files each hotspot under the same domain as its diagram', async () => {
+    const bank = await loadBank('a1');
+    for (const q of bank) {
+      if (q.type !== 'hotspot') continue;
+      const diagram = DIAGRAMS[q.diagramId as keyof typeof DIAGRAMS];
+      expect(q.domainId, q.id).toBe(diagram.domainId);
+    }
   });
 });
