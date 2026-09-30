@@ -1,66 +1,93 @@
-import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf, type TrackId } from '../../content';
-import { domainMastery } from '../../domain/mastery/readiness';
+import { Cpu, Layers } from 'lucide-react';
+import { Button } from '@/components/ui/8bit/button';
+import { Progress } from '@/components/ui/8bit/progress';
+import { PageHead } from '@/components/Shell';
+import { Panel } from '@/components/Panel';
+import { href } from '@/app/route';
+import { go } from '@/app/useRoute';
+import { diagramsOf } from '@/content/diagrams';
+import { TRACKS, cardsOfDomain, cardsOfTrack, domainsOf } from '@/content';
+import { domainMastery } from '@/domain/mastery/readiness';
 import { useStates } from '../useApp';
 
-interface Props {
-  onReview: (track: TrackId) => void;
-}
-
-export function LearnPage({ onReview }: Props) {
+export function LearnPage() {
   const states = useStates();
-  if (!states) return <p className="quiet">Loading…</p>;
+  if (!states) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
   return (
     <>
-      <header className="page-head">
-        <h1>Learn</h1>
-        <p className="quiet">Three tracks. Only CS50 has cards so far.</p>
-      </header>
+      <PageHead title="Learn" sub="Three tracks. Domains follow the exam's own outline, weighted as the exam weights them." />
 
       {TRACKS.map((track) => {
-        const domains = domainsOf(track.id);
         const hasCards = cardsOfTrack(track.id).length > 0;
         return (
-          <section className="card" key={track.id} aria-labelledby={`t-${track.id}`}>
-            <h2 id={`t-${track.id}`}>{track.title}</h2>
-            <p className="quiet">
+          <Panel key={track.id} id={`t-${track.id}`} title={track.title}>
+            <p className="text-sm text-muted-foreground">
               {track.exam
                 ? `${track.exam.code} · ${track.exam.questions} questions · ${track.exam.minutes} min · pass ${track.exam.passMark}/${track.exam.scale}`
                 : track.objectiveVersion}
             </p>
-            <ul className="rows">
-              {domains.map((domain) => {
+            <ul className="divide-y-2 divide-dashed divide-border">
+              {domainsOf(track.id).map((domain) => {
                 const cards = cardsOfDomain(domain.id);
                 const mastery = domainMastery(
                   { id: domain.id, weight: domain.weight, cardIds: cards.map((c) => c.id) },
                   states,
                 );
+                const pct = Math.round(mastery.mastery * 100);
                 return (
-                  <li key={domain.id} className="row">
-                    <span>
-                      <strong>{domain.title}</strong>
-                      <span className="quiet">
-                        {' '}· {track.exam ? `${Math.round(domain.weight * 100)}% of exam` : domain.code}
+                  <li key={domain.id} className="py-4">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span>
+                        <span className="font-semibold">{domain.title}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {' '}· {track.exam ? `${Math.round(domain.weight * 100)}% of exam` : domain.code}
+                        </span>
                       </span>
-                    </span>
-                    <span className="quiet">
-                      {cards.length === 0 ? 'no cards yet' : `${Math.round(mastery.mastery * 100)}% · ${cards.length} cards`}
-                    </span>
+                      <span className="shrink-0 text-sm text-muted-foreground">
+                        {cards.length === 0 ? 'no cards yet' : <><span className="font-pixel text-xs text-foreground">{pct}%</span> · {cards.length}</>}
+                      </span>
+                    </div>
+                    {cards.length > 0 ? (
+                      <Progress variant="retro" value={pct} className="mt-3 h-2" aria-label={`${domain.title} mastery ${pct}%`} />
+                    ) : null}
+                    {cards.length > 0 ? (
+                      <a
+                        href={href({ name: 'flashcards', deck: domain.id })}
+                        className="mt-3 mr-6 inline-flex min-h-12 items-center gap-2 text-(--color-accent) underline-offset-4 hover:underline"
+                      >
+                        <Layers aria-hidden="true" className="size-4" /> Flashcards ({cards.length})
+                      </a>
+                    ) : null}
+                    {diagramsOf(domain.id).map((diagram) => (
+                      <a
+                        key={diagram.id}
+                        href={href({ name: 'diagram', id: diagram.id })}
+                        className="mt-3 inline-flex min-h-12 items-center gap-2 text-(--color-accent) underline-offset-4 hover:underline"
+                      >
+                        <Cpu aria-hidden="true" className="size-4" /> Diagram: {diagram.title}
+                      </a>
+                    ))}
                   </li>
                 );
               })}
             </ul>
             {hasCards ? (
-              <button type="button" className="primary" onClick={() => onReview(track.id)}>
-                Review {track.title}
-              </button>
+              <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                <Button className="h-12" onClick={() => go({ name: 'review', track: track.id })}>
+                  Review {track.title}
+                </Button>
+                <Button asChild variant="secondary" className="h-12">
+                  <a href={href({ name: 'flashcards', deck: track.id })}>Flashcards</a>
+                </Button>
+              </div>
             ) : (
-              <p className="quiet">
-                Content is on its way. The domain list and weights are the exam’s own structure;
-                verify them against the official objectives before you rely on the percentages.
+              <p className="text-sm text-muted-foreground">
+                Cards are on their way. Verify the weights against CompTIA's official objectives before
+                you rely on the percentages.
               </p>
             )}
-          </section>
+          </Panel>
         );
       })}
     </>

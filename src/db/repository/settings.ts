@@ -12,6 +12,8 @@ export function defaultSettings(): SettingsRow {
     heartbeatOrigin: DEFAULT_HEARTBEAT_ORIGIN,
     linkState: 'unlinked',
     newPerDay: 12,
+    characterName: '',
+    tracks: ['cs50', 'a1'],
     schemaVersion: SCHEMA_VERSION,
   };
 }
@@ -52,4 +54,12 @@ export async function unlinkHeartBeat(): Promise<SettingsRow> {
   const { studyToken: _dropped, ...rest } = current;
   await db.settings.put({ ...rest, linkState: 'unlinked' });
   return getSettings();
+}
+
+/** The longest name the character can have; it has to fit on a phone header. */
+export const MAX_CHARACTER_NAME = 24;
+
+/** Trims and bounds a typed name. An empty result means "ask again". */
+export function cleanCharacterName(raw: string): string {
+  return raw.replace(/\s+/g, ' ').trim().slice(0, MAX_CHARACTER_NAME);
 }

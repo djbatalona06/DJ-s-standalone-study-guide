@@ -1,8 +1,10 @@
 # DJ-s-standalone-study-guide
 
-HTML5 only with an XP gate/sync to the Heartbeat PWA iOS app.
-
-The app is called Lantern for now (working title).
+**Lantern** (working title) is a **TypeScript web app**: React + TypeScript, built with Vite, and
+installable on a phone as a PWA (progressive web app). It is not a plain HTML5 site. `index.html` is
+only the shell the browser loads; every screen is TypeScript (`.ts`/`.tsx`) compiled into
+JavaScript by `npm run build`. It runs in any modern browser, needs no app store, and earns XP
+in the HeartBeat PWA through HeartBeat's study-token bridge.
 
 A study app for CS50 / intro CS and CompTIA A+ (Core 1 `220-1201`, Core 2 `220-1202`),
 built to send XP to [HeartBeat](https://heartbeat-eop.pages.dev) through the study-token
@@ -16,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 56 tests: scheduler, queue, outbox, content, readiness, repository
+npm test           # 141 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -37,10 +39,39 @@ npm run build
 - **Screens**: Today, Learn, Review (keyboard: Space reveals, 1–4 grade), Me (link, new cards
   per day, backup export/import that never contains the token).
 
+## What exists (8-bit slice)
+
+- **Look:** an 8-bit "terminal after dark" theme built on [8bitcn/ui](https://www.8bitcn.com/)
+  (Tailwind v4 + shadcn/ui), in HeartBeat's token names. `src/theme/contrast.test.ts` keeps
+  every text colour readable in both modes.
+- **Your character:** a 16×16 pixel hacker (`src/art/sprites.ts`) who works his way from
+  help desk to cloud. You name him when you first open the app.
+- **Onboarding, hash routes, a streak, and the next interval shown on every grade button.**
+- **Flashcards mode (Quizlet-style):** one big card that flips, ← → arrows, a counter,
+  shuffle, and every term listed underneath. **Get a hint** (or `H`) shows a hand-written nudge
+  before you flip; every card has one, and the validator rejects a hint that contains the answer.
+  Open it from any track or domain in Learn, or from the motherboard. Browsing is not graded;
+  Review is where cards get scheduled.
+- **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
+  then check), and a list view (`L`). Fully keyboard-operable. 15 new A+ Core 1 cards.
+- **Installable and offline:** a service worker precaches the app; diagram art is cached
+  the first time you open it.
+
 ## What is not built yet
 
-Diagrams, quizzes and exams, the A+ decks, the career pathway, a service worker / install
-prompt, and an accessibility and Lighthouse pass. See `docs/06-Implementation-Plan.md`.
+Match mode and more diagrams, quizzes and exams, the rest of the A+ decks, the career pathway
+(and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
+
+## Take the wheel
+
+Good first changes if you want to learn the codebase:
+
+- **Draw the help desk sprite.** Copy `hacker-idle-a` in `src/art/sprites.ts`, give him a
+  headset, and run `npm test`. The test tells you if a row is the wrong length.
+- **Add the RAM-keying diagram.** Copy `src/content/diagrams/motherboard.ts` and
+  `diagram-motherboard.ts`, then run `npm test`. `validateDiagram` lists what is missing.
+- **Tune a colour** in `src/theme/palette.ts` and `src/styles.css`. `contrast.test.ts` fails if
+  it stops being readable.
 
 ## Linking to HeartBeat
 

@@ -12,7 +12,7 @@ Track → Domain (objective) → Topic → Card | Diagram | Question
 interface Track   { id: 'cs50' | 'a1' | 'a2'; title: string; objectiveVersion: string; examCode?: string }
 interface Domain  { id: string; trackId: string; code: string; title: string; weight: number; order: number; objectiveVersion: string }
 interface Topic   { id: string; domainId: string; title: string; order: number }
-interface Card    { id: string; topicId: string; front: string; back: string; imageId?: string; diagramPartId?: string; tags: string[]; provenance: Provenance; sourceUrl?: string }
+interface Card    { id: string; topicId: string; front: string; back: string; why: string; hint: string /* required; must not contain the answer */; imageId?: string; diagramPartId?: string; tags: string[]; provenance: Provenance; sourceUrl?: string }
 interface Diagram { id: string; topicId: string; title: string; viewBox: string; parts: DiagramPart[]; textAlternative: string }
 interface DiagramPart { id: string; label: string; cardId: string; hotspot: string }
 type Question = MCQ | MultiSelect | Ordering | Match | Hotspot | PBQ // all carry: id, topicId, prompt, explanation, difficulty, provenance

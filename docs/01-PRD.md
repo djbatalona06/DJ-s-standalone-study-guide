@@ -1,5 +1,7 @@
 # 01 — PRD: Lantern (working title), a study platform for CS50 and CompTIA A+
 
+**What it is:** a TypeScript web app (React + Vite), installable as a PWA. Not a plain HTML5 site and not a native app.
+
 Status: draft v0.1, 2026-09-29. "Lantern" is a placeholder name.
 
 ## 1. Problem
@@ -39,7 +41,7 @@ Not a public product. No accounts, no leaderboard, no ads.
 
 | Feature | Detail | Phase |
 |---|---|---|
-| Flashcards | SM-2 scheduling ported from `domain/study/srs.ts` (ease 2.5, floor 1.3, ceiling 3). Cards carry domain and tags. "Again" returns the card today without resetting it (kept from HeartBeat). | 1 |
+| Flashcards | Two ways in: **Review** (SM-2 scheduling, graded) and **Flashcards mode** (Quizlet-style browsing: flip card, arrows, shuffle, term list; not graded). Every card has a hand-written **hint** shown on request before flipping. SM-2 scheduling ported from `domain/study/srs.ts` (ease 2.5, floor 1.3, ceiling 3). Cards carry domain and tags. "Again" returns the card today without resetting it (kept from HeartBeat). | 1 |
 | CS50 deck | Original cards per CS50x week: binary/ASCII, C basics, arrays, sorting/searching, memory, data structures, Python, SQL, web, Flask. | 1 |
 | XP sync | Study token, offline queue, idempotent `sessionId`, "Reconnect" on 401. | 1 |
 | Diagram engine | Explore (tap a part, read a card), Label (place names), Match (drag term to part). SVG registry, keyboard and screen-reader accessible. | 2 |

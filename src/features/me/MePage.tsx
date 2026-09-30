@@ -1,9 +1,15 @@
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Button } from '@/components/ui/8bit/button';
+import { Input } from '@/components/ui/8bit/input';
+import { Switch } from '@/components/ui/8bit/switch';
+import { PageHead } from '@/components/Shell';
+import { Panel } from '@/components/Panel';
+import { TRACKS } from '@/content';
 import { db } from '../../db/database';
 import {
-  exportProgress, flushOutbox, importProgress, linkHeartBeat, parseBackup, saveSettings,
-  unlinkHeartBeat, type ImportProblem,
+  MAX_CHARACTER_NAME, cleanCharacterName, exportProgress, flushOutbox, importProgress, linkHeartBeat,
+  parseBackup, saveSettings, unlinkHeartBeat, type ImportProblem,
 } from '../../db/repository';
 import { useSettings } from '../useApp';
 
@@ -60,16 +66,33 @@ export function MePage() {
   }
 
   const linked = settings.linkState !== 'unlinked';
+  const label = 'mb-3 mt-4 block text-sm font-semibold';
 
   return (
     <>
-      <header className="page-head">
-        <h1>Me</h1>
-      </header>
+      <PageHead title="Me" />
 
-      <section className="card" aria-labelledby="h-link">
-        <h2 id="h-link">HeartBeat link</h2>
-        <p className="quiet">
+      <Panel title="Character" id="character">
+        <label className={label} htmlFor="me-name">Name</label>
+        <Input
+          id="me-name"
+          font="normal"
+          className="h-12 text-base"
+          maxLength={MAX_CHARACTER_NAME}
+          defaultValue={settings.characterName}
+          key={settings.characterName}
+          autoComplete="off"
+          spellCheck={false}
+          onBlur={(e) => {
+            const name = cleanCharacterName(e.target.value);
+            if (name && name !== settings.characterName) void saveSettings({ characterName: name });
+          }}
+        />
+        <p className="mt-3 text-sm text-muted-foreground">Saved when you leave the field. It cannot be blank.</p>
+      </Panel>
+
+      <Panel title="HeartBeat link" id="link">
+        <p className="text-muted-foreground">
           {settings.linkState === 'unlinked' && 'Not linked. Studying works without it.'}
           {settings.linkState === 'linked' && 'Linked. Finished sessions earn XP for your pet.'}
           {settings.linkState === 'needs-reconnect' && 'The link was revoked. Paste a new token to reconnect.'}
@@ -83,20 +106,22 @@ export function MePage() {
               void link();
             }}
           >
-            <label className="field-label" htmlFor="token">Study token</label>
-            <input
+            <label className={label} htmlFor="token">Study token</label>
+            <Input
               id="token"
-              className="field"
+              font="normal"
+              className="h-12 text-base"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               autoComplete="off"
               spellCheck={false}
-              placeholder="Copied from HeartBeat → Settings → study app"
+              placeholder="HeartBeat → Settings → study app"
             />
-            <label className="field-label" htmlFor="origin">HeartBeat address (optional)</label>
-            <input
+            <label className={label} htmlFor="origin">HeartBeat address (optional)</label>
+            <Input
               id="origin"
-              className="field"
+              font="normal"
+              className="h-12 text-base"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
               inputMode="url"
@@ -104,32 +129,47 @@ export function MePage() {
               spellCheck={false}
               placeholder={settings.heartbeatOrigin}
             />
-            <button type="submit" className="primary" disabled={!token.trim()}>
+            <Button type="submit" className="mt-6 h-12 w-full" disabled={!token.trim()}>
               {settings.linkState === 'needs-reconnect' ? 'Reconnect' : 'Link'}
-            </button>
+            </Button>
           </form>
         )}
 
         {linked && (
-          <button
+          <Button
             type="button"
-            className="secondary"
+            variant="secondary"
+            className="mt-3 h-12 w-full"
             onClick={async () => {
               await unlinkHeartBeat();
               setNote('Unlinked on this device. Revoke the token in HeartBeat Settings too.');
             }}
           >
             Unlink this device
-          </button>
+          </Button>
         )}
-      </section>
+      </Panel>
 
-      <section className="card" aria-labelledby="h-study">
-        <h2 id="h-study">Studying</h2>
-        <label className="field-label" htmlFor="new-per-day">New cards a day</label>
-        <input
+      <Panel title="Studying" id="study">
+        <ul className="divide-y-2 divide-dashed divide-border">
+          {TRACKS.map((track) => (
+            <li key={track.id} className="flex min-h-12 items-center justify-between gap-4 py-3">
+              <label htmlFor={`me-track-${track.id}`}>Show {track.title} on Today</label>
+              <Switch
+                id={`me-track-${track.id}`}
+                checked={settings.tracks.includes(track.id)}
+                onCheckedChange={(on) => void saveSettings({
+                  tracks: on ? [...settings.tracks, track.id] : settings.tracks.filter((t) => t !== track.id),
+                })}
+              />
+            </li>
+          ))}
+        </ul>
+        <label className={label} htmlFor="new-per-day">New cards a day</label>
+        <Input
           id="new-per-day"
-          className="field"
+          font="normal"
+          className="h-12 text-base"
           type="number"
           min={0}
           max={50}
@@ -139,28 +179,31 @@ export function MePage() {
             void saveSettings({ newPerDay: value });
           }}
         />
-        <p className="quiet">Day boundaries follow your timezone: {settings.timeZone}.</p>
-      </section>
+        <p className="mt-3 text-sm text-muted-foreground">Days follow your timezone: {settings.timeZone}.</p>
+      </Panel>
 
-      <section className="card" aria-labelledby="h-backup">
-        <h2 id="h-backup">Backup</h2>
-        <p className="quiet">
-          Progress lives on this device only. Download a backup now and then; restoring merges,
-          it never deletes.
+      <Panel title="Backup" id="backup">
+        <p className="text-muted-foreground">
+          Progress lives on this device only. Download a backup now and then; restoring merges, it
+          never deletes.
         </p>
-        <button type="button" className="secondary" onClick={() => void download()}>Download backup</button>
-        <label className="field-label" htmlFor="restore">Restore from a backup</label>
+        <Button type="button" variant="secondary" className="mt-3 h-12 w-full" onClick={() => void download()}>
+          Download backup
+        </Button>
+        <label className={label} htmlFor="restore">Restore from a backup</label>
         <input
           id="restore"
           ref={fileInput}
-          className="field"
+          className="block w-full text-sm file:mr-4 file:min-h-12 file:border-0 file:bg-secondary file:px-4 file:font-pixel file:text-[0.625rem] file:text-foreground"
           type="file"
           accept="application/json,.json"
           onChange={(e) => void restore(e.target.files?.[0])}
         />
-      </section>
+      </Panel>
 
-      {note ? <p className="toast" role="status">{note}</p> : null}
+      {note ? (
+        <p role="status" className="border-4 border-foreground bg-card p-4 dark:border-ring">{note}</p>
+      ) : null}
     </>
   );
 }

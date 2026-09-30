@@ -24,6 +24,8 @@ flowchart TD
   Domain --> Deck[Deck list]
   Domain --> DiagList[Diagrams]
   Deck --> Review
+  Deck --> Flash[Flashcards /flashcards/:deck]
+  Diagram --> Flash
   DiagList --> Diagram[Diagram explorer]
   Diagram --> Label[Label mode]
   Diagram --> Match[Match mode]
@@ -69,6 +71,7 @@ flowchart TD
 
 - **Track** (`/learn/a1`): domains as rows, each with a mastery ring and objective code, ordered as the official objectives list them, with its exam weight shown.
 - **Domain**: topic list; each topic has cards, quiz questions and (where relevant) a diagram. "Study this topic" starts a review filtered to it.
+- **Flashcards** (`/flashcards/:deck`, deck = a track, domain or diagram id): Quizlet-style. One large card; tap or Space flips it (3D flip, instant under reduced motion). **Get a hint** (`H`) shows the card's written hint under the term before flipping. ← → move, a counter shows 3 / 15, **Shuffle** reorders, and "Terms in this set" lists every term and definition underneath. The last card leads to "Start over", "Shuffle" or "Review with spaced repetition". Not graded, no XP: Review is where cards are scheduled.
 - **Diagram explorer** (`/diagram/:id`):
   - *Explore:* tap a part → its card slides up; next/previous part buttons; a "list view" toggle (the accessible text alternative).
   - *Label:* names are shown in a tray; place each on its part (tap name then tap part; drag also works). Check → correct/incorrect per label, with a "show me" per miss. Enqueues `match`.
@@ -126,4 +129,4 @@ UI copy: 200 with `xp: 0` says "Today's study XP is maxed (120)". Never call it 
 
 ## 11. Keyboard and gestures
 
-Review: Space reveal, 1–4 grade, `Z` undo last grade. Diagram: arrow keys move between parts, Enter opens the card, `L` toggles list view. Exam: `N/P` next/previous, `F` flag.
+Review: Space reveal, 1–4 grade, `Z` undo last grade. Flashcards: Space flip, ← → move, `H` hint. Diagram: arrow keys move between parts, Enter opens the card, `L` toggles list view. Exam: `N/P` next/previous, `F` flag.

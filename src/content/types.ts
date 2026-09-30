@@ -32,6 +32,8 @@ export interface Card {
   back: string;
   /** Why the answer is the answer. The part that makes it stick. */
   why: string;
+  /** A nudge toward the answer without giving it away. Shown before the card flips. */
+  hint: string;
   provenance: Provenance;
   sourceUrl?: string;
   tags?: string[];

@@ -2,6 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { flushOutbox, getSettings } from './db/repository';
+// Fonts are bundled, not fetched from Google: the app works offline and no
+// third party learns who opened it.
+import '@fontsource/press-start-2p/latin-400.css';
+import '@fontsource-variable/outfit/index.css';
 import './styles.css';
 
 // Creates the settings row once, so screens can read it without writing.

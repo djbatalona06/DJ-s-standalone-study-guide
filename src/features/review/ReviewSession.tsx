@@ -1,4 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
+import { Sprite } from '@/art/Sprite';
+import { STAGE_FRAMES } from '@/art/sprites';
+import { Button } from '@/components/ui/8bit/button';
+import { Kbd } from '@/components/ui/8bit/kbd';
+import { Progress } from '@/components/ui/8bit/progress';
+import { Panel } from '@/components/Panel';
+import { intervalLabel, previewIntervals } from '@/domain/srs/preview';
+import { useSettings, useStates } from '../useApp';
 import { CARD_BY_ID, cardsOfTrack, type Card, type TrackId } from '../../content';
 import type { SessionRow } from '../../db/database';
 import {
@@ -33,6 +42,8 @@ export function ReviewSession({ trackId, onExit }: Props) {
   const [done, setDone] = useState<{ sent: FlushSummary | null; queued: boolean } | null>(null);
   const [fault, setFault] = useState<string | null>(null);
 
+  const states = useStates();
+  const { characterName } = useSettings();
   const session = useRef<SessionRow | null>(null);
   const day = useRef('');
   const shownAt = useRef(0);
@@ -122,39 +133,42 @@ export function ReviewSession({ trackId, onExit }: Props) {
 
   if (fault) {
     return (
-      <section className="card" role="alert">
-        <h1>Something went wrong</h1>
-        <p>{fault}</p>
-        <p className="quiet">Your earlier answers were saved as you went.</p>
-        <button type="button" className="primary" onClick={onExit}>Back</button>
-      </section>
+      <Panel title="Something went wrong">
+        <div role="alert">
+          <p>{fault}</p>
+          <p className="text-muted-foreground">Your earlier answers were saved as you went.</p>
+        </div>
+        <Button className="mt-3 h-12 w-full" onClick={onExit}>Back</Button>
+      </Panel>
     );
   }
 
-  if (!queue) return <p className="quiet">Loading…</p>;
+  if (!queue) return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
 
   if (done) {
     const accuracy = tally.reviewed ? Math.round((tally.correct / tally.reviewed) * 100) : 0;
     return (
-      <section className="card" aria-live="polite">
-        <h1>Session done</h1>
-        <p className="big">{tally.reviewed} cards</p>
-        <p className="quiet">
-          {accuracy}% good or easy · {Math.max(1, Math.round(tally.activeMs / 60_000))} min
-        </p>
-        <XpLine done={done} reviewed={tally.reviewed} />
-        <button type="button" className="primary" onClick={onExit}>Back to Today</button>
+      <section aria-live="polite" className="flex flex-col items-center gap-6 text-center">
+        <Sprite frames={STAGE_FRAMES.Foundations ?? []} size={112} label={`${characterName || 'Your character'}, typing on a laptop`} />
+        <h1 className="font-pixel text-sm leading-relaxed">Session done</h1>
+        <Panel className="w-full text-left">
+          <p className="font-pixel text-2xl">{tally.reviewed} cards</p>
+          <p className="text-muted-foreground">
+            {accuracy}% good or easy · {Math.max(1, Math.round(tally.activeMs / 60_000))} min
+          </p>
+          <XpLine done={done} reviewed={tally.reviewed} />
+          <Button className="mt-3 h-12 w-full" onClick={onExit}>Back to Today</Button>
+        </Panel>
       </section>
     );
   }
 
   if (queue.length === 0) {
     return (
-      <section className="card">
-        <h1>Nothing to review</h1>
-        <p className="quiet">You are done for today.</p>
-        <button type="button" className="primary" onClick={onExit}>Back</button>
-      </section>
+      <Panel title="Nothing to review">
+        <p className="text-muted-foreground">You are done for today.</p>
+        <Button className="mt-3 h-12 w-full" onClick={onExit}>Back</Button>
+      </Panel>
     );
   }
 
@@ -162,48 +176,62 @@ export function ReviewSession({ trackId, onExit }: Props) {
   if (!card) {
     // A card id that left the bundle: skip it rather than stall the session.
     void grade('good');
-    return <p className="quiet">Loading…</p>;
+    return <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>;
   }
 
+  const preview = previewIntervals(states?.get(card.id), card.id, day.current, Date.now());
+
   return (
-    <section aria-label="Review">
-      <header className="review-head">
-        <button
-          type="button"
-          className="quiet-button"
-          onClick={() => void finish(tally)}
-        >
-          Stop
-        </button>
-        <p className="quiet" aria-live="polite">{index + 1} of {queue.length}</p>
+    <section aria-label="Review" className="flex min-h-[calc(100dvh-80px)] flex-col">
+      <h1 className="sr-only">Review</h1>
+      <header className="mb-6 flex items-center gap-4">
+        <Button variant="ghost" size="icon" aria-label="Stop and save" onClick={() => void finish(tally)}>
+          <X aria-hidden="true" />
+        </Button>
+        <Progress
+          variant="retro"
+          className="h-3 flex-1"
+          value={Math.round((index / queue.length) * 100)}
+          aria-label={`Card ${index + 1} of ${queue.length}`}
+        />
+        <p className="font-pixel text-xs" aria-live="polite">{index + 1}/{queue.length}</p>
       </header>
 
-      <article className="card flash">
-        <p className="label">Question</p>
-        <p className="prompt">{card.front}</p>
+      <Panel className="min-h-64">
+        <p className="font-pixel text-[0.625rem] uppercase text-muted-foreground">Question</p>
+        <p className="text-xl font-semibold leading-snug">{card.front}</p>
         {revealed ? (
           <>
-            <p className="label">Answer</p>
-            <p className="answer">{card.back}</p>
-            <p className="why">{card.why}</p>
+            <p className="mt-4 font-pixel text-[0.625rem] uppercase text-(--color-accent)">Answer</p>
+            <p className="text-lg">{card.back}</p>
+            <p className="mt-3 border-t-2 border-dashed border-border pt-3 text-muted-foreground">{card.why}</p>
           </>
         ) : null}
-      </article>
+      </Panel>
 
-      {revealed ? (
-        <div className="grades" role="group" aria-label="How well did you know it?">
-          {GRADES.map((value, i) => (
-            <button key={value} type="button" className={`grade grade-${value}`} onClick={() => void grade(value)}>
-              <span>{GRADE_LABEL[value]}</span>
-              <span className="key" aria-hidden="true">{i + 1}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <button type="button" className="primary" onClick={() => setRevealed(true)}>
-          Show answer
-        </button>
-      )}
+      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+16px)] mt-auto">
+        {revealed ? (
+          <div className="grid grid-cols-4 gap-3" role="group" aria-label="How well did you know it?">
+            {GRADES.map((value, i) => (
+              <Button
+                key={value}
+                variant={value === 'good' ? 'default' : 'secondary'}
+                className="flex h-16 flex-col gap-1 px-1"
+                onClick={() => void grade(value)}
+                aria-label={`${GRADE_LABEL[value]}, next in ${intervalLabel(preview[value])}`}
+              >
+                <span className="font-pixel text-[0.625rem]">{GRADE_LABEL[value]}</span>
+                <span className="text-xs font-normal">{intervalLabel(preview[value])}</span>
+                <Kbd className="hidden min-[900px]:inline-flex" aria-hidden="true">{i + 1}</Kbd>
+              </Button>
+            ))}
+          </div>
+        ) : (
+          <Button className="h-14 w-full" onClick={() => setRevealed(true)}>
+            Show answer <Kbd className="ml-2 hidden min-[900px]:inline-flex" aria-hidden="true">Space</Kbd>
+          </Button>
+        )}
+      </div>
     </section>
   );
 }
@@ -211,7 +239,7 @@ export function ReviewSession({ trackId, onExit }: Props) {
 function XpLine({ done, reviewed }: { done: { sent: FlushSummary | null; queued: boolean }; reviewed: number }) {
   if (!done.queued) {
     return (
-      <p className="quiet">
+      <p className="text-muted-foreground">
         {reviewed < MIN_CARDS_FOR_XP
           ? `Sessions of ${MIN_CARDS_FOR_XP} cards or more earn HeartBeat XP.`
           : 'Saved.'}
@@ -219,13 +247,13 @@ function XpLine({ done, reviewed }: { done: { sent: FlushSummary | null; queued:
     );
   }
   if (!done.sent || done.sent.attempted === 0) {
-    return <p className="quiet">Saved. It will go to HeartBeat when you are linked and online.</p>;
+    return <p className="text-muted-foreground">Saved. It will go to HeartBeat when you are linked and online.</p>;
   }
   if (done.sent.needsReconnect) {
     return <p>Saved, but the HeartBeat link needs reconnecting in Me.</p>;
   }
-  if (done.sent.sent === 0) return <p className="quiet">Saved. It will retry when you are back online.</p>;
+  if (done.sent.sent === 0) return <p className="text-muted-foreground">Saved. It will retry when you are back online.</p>;
   return done.sent.xp > 0
-    ? <p>+{done.sent.xp} XP for the pet.</p>
-    : <p className="quiet">Today’s study XP is maxed out. Nice.</p>;
+    ? <p className="font-pixel text-xs text-(--color-xp)">+{done.sent.xp} XP for the pet</p>
+    : <p className="text-muted-foreground">Today’s study XP is maxed for today. Nice work.</p>;
 }
