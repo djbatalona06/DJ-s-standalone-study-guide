@@ -18,7 +18,7 @@ and a context block). Treat those as the source of truth.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 142 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
+npm test           # 146 tests: scheduler, queue, outbox, content, diagrams, readiness, repository, palette contrast, sprites, routes
 npm run typecheck
 npm run build
 ```
@@ -56,7 +56,8 @@ The same three checks run on every pull request and push to `main` in GitHub Act
   Open it from any track or domain in Learn, or from the motherboard. Browsing is not graded;
   Review is where cards get scheduled.
 - **Motherboard diagram:** Explore (tap a part, read its card), Label (put the names on,
-  then check), and a list view (`L`). Fully keyboard-operable.
+  then check), Match (each pair is checked at once; right ones lock, first tries are scored),
+  and a list view (`L`). Fully keyboard-operable.
 - **A+ Core 1 deck:** 110 original cards across all five domains (Mobile 15, Networking 25,
   Hardware 30 including the 15 motherboard cards, Virtualization/Cloud 12, Troubleshooting 28),
   written from the 220-1201 objectives as an outline, each with a why and a hint.
@@ -65,7 +66,7 @@ The same three checks run on every pull request and push to `main` in GitHub Act
 
 ## What is not built yet
 
-Match mode and more diagrams, quizzes and exams, Core 2 cards, the career pathway
+More diagrams, quizzes and exams, Core 2 cards, the career pathway
 (and the character's later stages), and a Lighthouse pass. See `docs/06-Implementation-Plan.md`.
 
 ## Take the wheel

@@ -10,16 +10,18 @@ import { DIAGRAM_ART, diagramById, type Diagram, type DiagramArt, type DiagramId
 import { finishSession, flushOutbox, getSettings, startSession } from '@/db/repository';
 import { todayKey } from '@/domain/day';
 import { nextIndex, place, scoreLabels, type LabelScore } from '@/domain/diagram/diagram';
+import { EMPTY_MATCH, matchScore, tryMatch, type MatchState } from '@/domain/diagram/match';
 import { MIN_CARDS_FOR_XP, type SessionMode } from '@/domain/xp/kinds';
 import { cn } from '@/lib/utils';
 
-type Mode = 'explore' | 'label';
+type Mode = 'explore' | 'label' | 'match';
 type Placements = Record<string, string | undefined>;
 
 /**
- * One diagram, three ways in (App Flow §5):
+ * One diagram, four ways in (App Flow §5):
  * - Explore: pick a part, read its card.
  * - Label: pick a name, put it on a part, check.
+ * - Match: pick a name, pick a part, and hear right or wrong at once.
  * - List: the same parts as text. The screen-reader path, and what shows if
  *   the art chunk fails to load.
  */
@@ -85,10 +87,13 @@ function Viewer({ diagram }: { diagram: Diagram }) {
   const [placements, setPlacements] = useState<Placements>({});
   const [score, setScore] = useState<LabelScore | null>(null);
   const [status, setStatus] = useState('');
+  const [matchState, setMatchState] = useState<MatchState>(EMPTY_MATCH);
+  const [feedback, setFeedback] = useState<{ right: boolean; text: string; partId: string } | null>(null);
 
   const partRefs = useRef<Array<SVGGElement | null>>([]);
   const explore = useDiagramSession(diagram, 'diagram');
   const label = useDiagramSession(diagram, 'matching');
+  const match = useDiagramSession(diagram, 'matching');
   const parts = diagram.parts;
 
   useEffect(() => {
@@ -132,6 +137,10 @@ function Viewer({ diagram }: { diagram: Diagram }) {
       openExplore(index);
       return;
     }
+    if (mode === 'match') {
+      matchPart(index);
+      return;
+    }
     if (score) return;
     if (!chip) {
       setStatus('Pick a name from the tray first, then the part it belongs on.');
@@ -141,6 +150,37 @@ function Viewer({ diagram }: { diagram: Diagram }) {
     setPlacements((current) => place(current, parts[index].id, chip));
     setStatus(`${chip} placed on part ${index + 1}.`);
     setChip(null);
+  }
+
+  function matchPart(index: number) {
+    const part = parts[index];
+    if (matchState.matched[part.id] !== undefined) return;
+    if (!chip) {
+      setStatus('Pick a name from the tray first, then the part it belongs on.');
+      return;
+    }
+    void match.begin();
+    const result = tryMatch(parts, matchState, part.id, chip);
+    const text = result.correct
+      ? `Right: part ${index + 1} is ${chip}.`
+      : `Not that one: part ${index + 1} is not ${chip}. Try another part.`;
+    setMatchState(result.state);
+    setFeedback({ right: result.correct, text, partId: part.id });
+    setStatus(text);
+    if (result.correct) setChip(null);
+    const after = matchScore(parts, result.state);
+    if (after.done) {
+      setStatus(`${text} All ${parts.length} matched, ${after.firstTry} on the first try.`);
+      void match.end(parts.length, after.firstTry);
+    }
+  }
+
+  function resetMatch() {
+    setMatchState(EMPTY_MATCH);
+    setFeedback(null);
+    setChip(null);
+    setStatus('');
+    match.reset();
   }
 
   function onPartKey(event: KeyboardEvent, index: number) {
@@ -170,7 +210,9 @@ function Viewer({ diagram }: { diagram: Diagram }) {
     label.reset();
   }
 
-  const placedLabels = new Set(Object.values(placements));
+  const shown = mode === 'match' ? matchState.matched : placements;
+  const placedLabels = new Set(Object.values(shown));
+  const matchResult = matchScore(parts, matchState);
   const complete = scoreLabels(parts, placements).complete;
   const open = openPart === null ? null : parts[openPart];
   const openCard = open ? CARD_BY_ID.get(open.cardId) : undefined;
@@ -180,15 +222,15 @@ function Viewer({ diagram }: { diagram: Diagram }) {
       <PageHead title={diagram.title} sub={diagram.blurb} />
 
       <div className="mb-6 flex flex-wrap items-center gap-3" role="group" aria-label="Mode">
-        {(['explore', 'label'] as const).map((m) => (
+        {(['explore', 'label', 'match'] as const).map((m) => (
           <Button
             key={m}
             variant={mode === m ? 'default' : 'secondary'}
             aria-pressed={mode === m}
             className="h-12 px-4"
-            onClick={() => { setMode(m); setStatus(''); }}
+            onClick={() => { setMode(m); setStatus(''); setChip(null); }}
           >
-            {m === 'explore' ? 'Explore' : 'Label'}
+            {m === 'explore' ? 'Explore' : m === 'label' ? 'Label' : 'Match'}
           </Button>
         ))}
         <Button
@@ -210,14 +252,16 @@ function Viewer({ diagram }: { diagram: Diagram }) {
       <p className="mb-4 text-sm text-muted-foreground">
         {mode === 'explore'
           ? `Tap a part, or Tab in and use the arrow keys. ${viewed.size} of ${parts.length} looked at.`
-          : 'Pick a name, then the part it belongs on. Keyboard: pick a name, arrow to the part, Enter.'}
+          : mode === 'label'
+            ? 'Pick a name, then the part it belongs on. Keyboard: pick a name, arrow to the part, Enter.'
+            : 'Pick a name, then its part: each pair is checked at once. Keyboard: pick a name, arrow to the part, Enter.'}
       </p>
 
       {artFailed ? (
         <p role="alert" className="mb-4 text-(--color-danger)">The picture could not load, so here are the same parts as a list.</p>
       ) : null}
 
-      {mode === 'label' && (
+      {mode !== 'explore' && (
         <Panel title="Names" id="tray">
           <ul className="flex flex-wrap gap-2" aria-label="Names to place">
             {labels.map((name) => {
@@ -228,7 +272,7 @@ function Viewer({ diagram }: { diagram: Diagram }) {
                   <button
                     type="button"
                     aria-pressed={selected}
-                    disabled={score !== null}
+                    disabled={mode === 'match' ? used : score !== null}
                     onClick={() => setChip(selected ? null : name)}
                     className={cn(
                       'min-h-12 border-2 border-dashed px-3 text-sm',
@@ -244,6 +288,14 @@ function Viewer({ diagram }: { diagram: Diagram }) {
           </ul>
         </Panel>
       )}
+
+      {mode === 'match' && feedback ? (
+        // Between the tray and the picture, so a phone shows it next to the tap.
+        <p className={cn('mb-4 flex items-center gap-2', feedback.right ? 'text-(--color-success)' : 'text-(--color-danger)')}>
+          {feedback.right ? <Check aria-hidden="true" className="size-5 shrink-0" /> : <X aria-hidden="true" className="size-5 shrink-0" />}
+          <span className="text-foreground">{feedback.text}</span>
+        </p>
+      ) : null}
 
       {!showList && art ? (
         <Panel className="p-3">
@@ -275,13 +327,13 @@ function Viewer({ diagram }: { diagram: Diagram }) {
               ))}
               {parts.map((part, index) => {
                 const r = art.shapes[part.id];
-                const placed = placements[part.id];
-                const right = score?.correct.includes(part.id);
-                const wrong = score?.wrong.includes(part.id);
+                const placed = shown[part.id];
+                const right = mode === 'match' ? placed !== undefined : score?.correct.includes(part.id);
+                const wrong = mode === 'match' ? feedback?.partId === part.id && !feedback.right : score?.wrong.includes(part.id);
                 const lit = mode === 'explore' ? viewed.has(part.id) || openPart === index : placed !== undefined;
                 const name = mode === 'explore'
                   ? part.label
-                  : `Part ${index + 1}${placed ? `, labelled ${placed}` : ', no label yet'}${right ? ', correct' : wrong ? `, wrong: it is ${part.label}` : ''}`;
+                  : `Part ${index + 1}${placed ? `, labelled ${placed}` : ', no label yet'}${right ? ', correct' : wrong ? (mode === 'match' ? ', wrong, try another name' : `, wrong: it is ${part.label}`) : ''}`;
                 return (
                   <g
                     key={part.id}
@@ -303,7 +355,7 @@ function Viewer({ diagram }: { diagram: Diagram }) {
                       stroke={wrong ? 'var(--color-danger)' : lit ? 'var(--color-accent)' : 'var(--color-text-muted)'}
                       strokeWidth={0.8}
                     />
-                    {mode === 'label' ? (
+                    {mode !== 'explore' ? (
                       <text
                         x={r.x + r.w / 2} y={r.y + r.h / 2}
                         textAnchor="middle" dominantBaseline="central"
@@ -337,13 +389,13 @@ function Viewer({ diagram }: { diagram: Diagram }) {
         <p className="font-pixel text-xs text-muted-foreground">loading<span className="cursor" /></p>
       ) : null}
 
-      {showList || mode === 'label' ? (
-        <Panel title={mode === 'label' ? 'Your labels' : 'Parts'} id="parts">
+      {showList || mode !== 'explore' ? (
+        <Panel title={mode === 'explore' ? 'Parts' : mode === 'label' ? 'Your labels' : 'Your matches'} id="parts">
           <ol className="divide-y-2 divide-dashed divide-border">
             {parts.map((part, index) => {
-              const placed = placements[part.id];
-              const right = score?.correct.includes(part.id);
-              const wrong = score?.wrong.includes(part.id);
+              const placed = shown[part.id];
+              const right = mode === 'match' ? placed !== undefined : score?.correct.includes(part.id);
+              const wrong = mode === 'match' ? feedback?.partId === part.id && !feedback.right : score?.wrong.includes(part.id);
               const card = CARD_BY_ID.get(part.cardId);
               return (
                 <li key={part.id} className="flex min-h-12 items-center gap-3 py-3">
@@ -357,7 +409,7 @@ function Viewer({ diagram }: { diagram: Diagram }) {
                     <button
                       type="button"
                       className="flex flex-1 items-center gap-2 text-left disabled:cursor-default"
-                      disabled={score !== null}
+                      disabled={mode === 'match' ? right : score !== null}
                       onClick={() => activate(index)}
                       aria-label={`Part ${index + 1}: ${placed ?? 'no label yet'}${chip ? `. Place ${chip} here` : ''}`}
                     >
@@ -365,7 +417,11 @@ function Viewer({ diagram }: { diagram: Diagram }) {
                       {wrong ? <X aria-hidden="true" className="size-4 text-(--color-danger)" /> : null}
                       <span className={cn(!placed && 'text-muted-foreground')}>{placed ?? '—'}</span>
                       {right ? <span className="sr-only">correct</span> : null}
-                      {wrong ? <span className="text-sm text-muted-foreground">· it is {part.label}</span> : null}
+                      {wrong ? (
+                        <span className="text-sm text-muted-foreground">
+                          {mode === 'match' ? '· wrong, try another name' : `· it is ${part.label}`}
+                        </span>
+                      ) : null}
                     </button>
                   )}
                 </li>
@@ -375,7 +431,14 @@ function Viewer({ diagram }: { diagram: Diagram }) {
         </Panel>
       ) : null}
 
-      {mode === 'label' ? (
+      {mode === 'match' ? (
+        <div className="mb-8">
+          <p className="mb-3 font-pixel text-sm">
+            {matchResult.matched}/{parts.length} matched{matchResult.done ? ` · ${matchResult.firstTry} first try` : ''}
+          </p>
+          {matchResult.done ? <Button className="h-12 w-full" onClick={resetMatch}>Play again</Button> : null}
+        </div>
+      ) : mode === 'label' ? (
         <div className="mb-8">
           {score ? (
             <>
