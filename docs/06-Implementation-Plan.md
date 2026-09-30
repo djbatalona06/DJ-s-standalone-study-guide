@@ -63,6 +63,7 @@ DoD: the motherboard diagram is fully usable with keyboard and screen reader; ax
 - Also closed from Phase 1: onboarding, hash routes, the install/offline service worker, and the 8-bit theme plus the learner-named character (UI brief §2a–2b).
 - Also added: Flashcards mode (Quizlet layout) and a written hint on all 58 cards; the validator requires hints and rejects ones that contain the answer.
 - Next: Match mode; the RAM-keying diagram; the rest of the Core 1 cards (task 4); a headless keyboard test in CI.
+- CI: `.github/workflows/ci.yml` runs typecheck, tests and build on every PR and push to `main`.
 - Still open from Phase 1: the CS50 deck is at 43 cards of the 80–120 target (weeks 6–9 unwritten).
 
 ---
