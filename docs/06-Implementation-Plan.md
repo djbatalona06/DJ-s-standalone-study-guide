@@ -64,6 +64,7 @@ DoD: the motherboard diagram is fully usable with keyboard and screen reader; ax
 - Also added: Flashcards mode (Quizlet layout) and a written hint on all 58 cards; the validator requires hints and rejects ones that contain the answer.
 - Match mode (task 3): pick a name, pick a part, instant ✓/✗ with icon and text; right pairs lock, first-try matches are scored (`src/domain/diagram/match.ts`); finishing queues `match`. Verified at 390 and 1280 px, dark and light, axe clean, full keyboard-only walk.
 - Next: the RAM-keying diagram; the rest of the Core 1 cards (task 4); a headless keyboard test in CI.
+- CI: `.github/workflows/ci.yml` runs typecheck, tests and build on every PR and push to `main`.
 - Still open from Phase 1: the CS50 deck is at 43 cards of the 80–120 target (weeks 6–9 unwritten).
 
 ---
