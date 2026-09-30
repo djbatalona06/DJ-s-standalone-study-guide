@@ -15,3 +15,5 @@ jobs:
       - run: npm run typecheck             # TypeScript errors fail the build
       - run: npm test                      # Vitest unit tests
       - run: npm run build                 # the production build must succeed
+      - run: npx playwright install --with-deps chromium   # a real browser for the end-to-end test
+      - run: npm run e2e                   # drives the built app: study flow, keyboard, CSP, accessibility

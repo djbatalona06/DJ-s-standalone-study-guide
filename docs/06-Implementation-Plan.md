@@ -124,6 +124,12 @@ DoD: Lighthouse PWA/A11y/Best Practices ≥ 95; a11y checklist in `04` section 9
 
 ---
 
+**Progress (2026-09-30, polish):**
+- Lighthouse (mobile, simulated slow 4G, 4× CPU) against the built app with the strict CSP: **Accessibility 100, Best Practices 100, SEO 100, Performance 85** (FCP 2.9 s, LCP 3.6 s, TBT ≈ 0). Performance started at 78. Lighthouse 12+ dropped its PWA score, so installability is what the manifest and service worker give, not a number. The plan's ≥ 95 holds for the categories that exist except Performance, which is not at 95: react-dom (129 kB), Dexie (95 kB) and tailwind-merge (27 kB) are about 250 kB of the 358 kB main script, so more would mean swapping libraries.
+- What moved it: the service-worker registration is `defer` instead of render-blocking, a meta description, screens a first visit does not need (Learn, Me, Path, node, Flashcards, Review) are lazy chunks, and the welcome flow no longer downloads the card library until the tracks step.
+- `npm run e2e` (Playwright, headless Chromium) runs in CI: the study flow, an exam with the timer paused while hidden, a reload and resume, and a walk through every question, a keyboard-only diagram match, the career path, the strict CSP, and axe (WCAG 2 A/AA) on the main screens in both themes. It found one real bug while it was being written (a crash when two hotspots about different diagrams followed each other, fixed in the diagrams PR).
+- Still open: a full screen-reader walk of every screen by a person, calm mode, an install prompt, a backup reminder, error and empty states from the brief, and a check that airplane mode works end to end.
+
 ## Phase 6 — Measured scale work (only if measured)
 
 Do this only with data from PostHog and Workers logs.
