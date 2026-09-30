@@ -182,14 +182,20 @@ function Match({ q, order, answer, onAnswer, reveal }: Common<MatchQuestion> & {
  */
 function Hotspot({ q, answer, onAnswer, reveal }: Common<HotspotQuestion>) {
   const diagram = diagramById(q.diagramId);
-  const [art, setArt] = useState<DiagramArt | null>(null);
-  const [failed, setFailed] = useState(false);
+  // Remember which diagram the art belongs to: when the next question is about a
+  // different diagram, the old art must not be drawn with the new parts.
+  const [loaded, setLoaded] = useState<{ id: string; art: DiagramArt } | null>(null);
+  const [failedFor, setFailedFor] = useState<string | null>(null);
+  const art = loaded?.id === q.diagramId ? loaded.art : null;
+  const failed = failedFor === q.diagramId;
 
   useEffect(() => {
     let live = true;
     const load = DIAGRAM_ART[q.diagramId as DiagramId];
-    if (!load) { setFailed(true); return; }
-    load().then((m) => { if (live) setArt(m.default); }).catch(() => { if (live) setFailed(true); });
+    if (!load) { setFailedFor(q.diagramId); return; }
+    load()
+      .then((m) => { if (live) setLoaded({ id: q.diagramId, art: m.default }); })
+      .catch(() => { if (live) setFailedFor(q.diagramId); });
     return () => { live = false; };
   }, [q.diagramId]);
 
@@ -212,6 +218,7 @@ function Hotspot({ q, answer, onAnswer, reveal }: Common<HotspotQuestion>) {
           ))}
           {diagram.parts.map((part, i) => {
             const r = art.shapes[part.id];
+            if (!r) return null;
             const picked = chosen === i;
             const right = reveal && i === q.answer;
             const wrong = reveal && picked && i !== q.answer;
