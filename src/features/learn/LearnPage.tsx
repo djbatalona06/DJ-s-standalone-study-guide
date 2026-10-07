@@ -114,6 +114,9 @@ export function LearnPage() {
                 <Button variant="secondary" className="h-12" onClick={() => go({ name: 'battle', track: track.id })}>
                   Battle the bot
                 </Button>
+                <Button variant="secondary" className="h-12 sm:col-span-2" onClick={() => go({ name: 'typing', track: track.id })}>
+                  Typing stages vs the CPU
+                </Button>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">

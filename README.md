@@ -30,6 +30,7 @@ Every screen has its own link, so you can bookmark or share one.
 | Me | Name, new cards per day, backup, HeartBeat link | [#/me](https://lantern.batalona06.workers.dev/#/me) |
 | Study | Teach-then-test round: new cards shown once, then you type every answer | [#/study/a1](https://lantern.batalona06.workers.dev/#/study/a1) |
 | Battle | Seven short cards against a bot (Rookie, Regular, Veteran); answers also schedule the cards | [#/battle/a1](https://lantern.batalona06.workers.dev/#/battle/a1) |
+| Typing stages | Six stages racing a CPU in real time: copy the answer, then type it from memory; progress is saved | [#/typing/a1](https://lantern.batalona06.workers.dev/#/typing/a1) |
 | Review | Graded spaced-repetition session (CS50 / A+ Core 1 / A+ Core 2) | [#/review/a1](https://lantern.batalona06.workers.dev/#/review/a1) |
 | Flashcards | Quizlet-style flip cards with hints, per track or domain | [#/flashcards/a1](https://lantern.batalona06.workers.dev/#/flashcards/a1) |
 | Quick quiz | 10 questions for a track or domain | [#/quiz/a2](https://lantern.batalona06.workers.dev/#/quiz/a2) |
@@ -91,6 +92,24 @@ finish 5+ cards. HeartBeat shows one credit.
   kept through a 401 ("Reconnect"), and dropped only after 30 days.
 - **Screens**: Today, Learn, Review (keyboard: Space reveals, 1–4 grade), Me (link, new cards
   per day, backup export/import that never contains the token).
+
+## What exists (typing stages and the short-answer decks)
+
+- **Typing stages** (`#/typing/:track`, `src/features/typing/`, rules in `src/domain/typing/`): six stages,
+  five cards each, against a CPU that types at 18 to 52 WPM and shows its progress live next to yours.
+  Stages 1 to 3 **copy**: the answer is on screen and you type it exactly (case and curly quotes do not
+  matter, a typo is underlined and announced). Stages 4 to 6 are **recall**: the answer is hidden, you type
+  it from memory and press Enter, and the card is graded Good or Again like a review. Win 3 of 5 rounds to
+  clear a stage and open the next. Cleared stages and best WPM are kept on the device and travel in a
+  backup. **Relaxed** slows the CPU by 1.75x and is on by default in calm mode.
+- **328 short-answer cards** across every domain (`src/content/short-*.ts`): one fact each, such as a
+  port number, a command, an acronym or a cloud model, so each works as a flashcard, a review and a typing
+  round. The library went from 412 to 740 cards, and every domain now has at least 13 cards short enough
+  to race (CS50 Week 2, Virtualization and Cloud, and Security had almost none). A test fails if one drops
+  below ten, or if a hint gives its answer away.
+- **XP:** a finished typing stage is reported to HeartBeat as a `typing` session (15 XP, inside the same
+  120 XP daily cap). HeartBeat must be deployed with that kind first: an older server answers 400 and the
+  session is refused for good.
 
 ## What exists (8-bit slice)
 

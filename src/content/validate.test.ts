@@ -6,6 +6,7 @@ import { TRACKS_WITH_QUESTIONS, loadBank } from './questions';
 import type { Question } from './types';
 import { DIAGRAMS, DIAGRAM_ART, type Diagram, type DiagramArt } from './diagrams';
 import { CS50_CARDS } from './cs50';
+import { SHORT_CS50_CARDS } from './short-cs50';
 import type { Card } from './types';
 
 describe('the shipped content', () => {
@@ -17,7 +18,7 @@ describe('the shipped content', () => {
     for (const domain of domainsOf('cs50')) {
       expect(CARDS.filter((c) => c.domainId === domain.id).length).toBeGreaterThanOrEqual(5);
     }
-    expect(cardsOfTrack('cs50')).toEqual(CS50_CARDS);
+    expect(cardsOfTrack('cs50')).toEqual([...CS50_CARDS, ...SHORT_CS50_CARDS]);
   });
 
   it('covers every A+ Core 1 domain, written from the objectives as an outline', () => {
@@ -138,7 +139,7 @@ describe('deckById', () => {
   const diagrams = Object.values(DIAGRAMS);
 
   it('finds a track, a domain or a diagram', () => {
-    expect(deckById('cs50', diagrams)?.cards).toEqual(CS50_CARDS);
+    expect(deckById('cs50', diagrams)?.cards).toEqual([...CS50_CARDS, ...SHORT_CS50_CARDS]);
     expect(deckById('a1-d3', diagrams)?.title).toBe('Hardware');
     const board = deckById('motherboard', diagrams);
     expect(board?.cards.map((c) => c.id)).toEqual(DIAGRAMS.motherboard.parts.map((p) => p.cardId));

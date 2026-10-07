@@ -198,6 +198,49 @@ async function answerAny(page) {
   await context.close();
 }
 
+// ------------------------------------------------------ typing stages vs the CPU
+{
+  const { page, problems, context } = await learner();
+  await page.goto(U + '#/learn'); await page.getByRole('button', { name: /^Typing stages vs the CPU/ }).first().click();
+  await page.waitForSelector('text=Stage 1: Byte');
+  ok(await page.getByRole('button', { name: 'Start stage' }).nth(1).isDisabled(), 'stage 2 stays locked until stage 1 is cleared');
+  /** Copy stages show the answer: type exactly what is on screen, faster than the CPU. */
+  const playCopyStage = async () => {
+    for (let i = 0; i < 5; i++) {
+      await page.getByRole('button', { name: 'Go' }).click();
+      await page.waitForSelector('[data-testid=target]');
+      await page.locator('#typing-input').fill(await page.locator('[data-testid=target]').textContent());
+      await page.waitForSelector('[role=status]:has-text("Score:")');
+      await page.getByRole('button', { name: /Next round|See result/ }).click();
+    }
+  };
+  await page.getByRole('button', { name: 'Start stage' }).first().click();
+  await playCopyStage();
+  await page.waitForSelector('text=Stage 1 cleared');
+  ok(true, 'typing the answer exactly beats the Byte CPU and clears stage 1');
+  const dump = () => page.evaluate(() => new Promise((r) => { const o = indexedDB.open('lantern'); o.onsuccess = () => { const names = ['sessions', 'outbox', 'typingStages', 'reviewLog']; const t = o.result.transaction(names); const req = names.map((n) => t.objectStore(n).getAll()); t.oncomplete = () => r({ modes: req[0].result.map((x) => x.mode), kinds: req[1].result.map((x) => x.kind), stages: req[2].result.map((x) => `${x.id}:${x.clears}`), reviews: req[3].result.length }); }; }));
+  let saved = await dump();
+  ok(saved.modes.includes('typing') && saved.kinds.includes('typing'), `a typing stage is saved, and reported to HeartBeat as a typing session (${JSON.stringify(saved)})`);
+  ok(saved.stages.some((s) => /^[a-z0-9]+-1:1$/.test(s)), `the cleared stage is remembered (${saved.stages})`);
+  ok(saved.reviews === 0, 'copying a visible answer does not schedule its card');
+  await page.getByRole('button', { name: /^Next: Nibble/ }).click(); await playCopyStage(); await page.waitForSelector('text=Stage 2 cleared');
+  await page.getByRole('button', { name: /^Next: Kernel/ }).click(); await playCopyStage(); await page.waitForSelector('text=Stage 3 cleared');
+  // Recall stage: the answer is hidden, so a wrong answer ends the round and the card comes back for review.
+  await page.getByRole('button', { name: /^Next: Daemon/ }).click();
+  for (let i = 0; i < 5; i++) {
+    await page.getByRole('button', { name: 'Go' }).click();
+    ok(await page.locator('[data-testid=target]').count() === 0, i === 0 ? 'a recall stage hides the answer' : 'still hidden');
+    await page.locator('#typing-input').fill('no idea'); await page.keyboard.press('Enter');
+    await page.waitForSelector('[role=status]:has-text("Score:")');
+    await page.getByRole('button', { name: /Next round|See result/ }).click();
+  }
+  await page.waitForSelector('text=/Stage 4 cleared|The Daemon CPU held on/');
+  saved = await dump();
+  ok(saved.reviews === 5, `every recall round schedules its card (${saved.reviews} reviews)`);
+  ok(problems.length === 0, `no console or CSP problems while racing (${problems.join(' | ')})`);
+  await context.close();
+}
+
 // ------------------------------------------------------------------- axe
 for (const scheme of ['light', 'dark']) {
   const { page, context } = await learner({ scheme, bypassCSP: true });
@@ -222,6 +265,8 @@ for (const scheme of ['light', 'dark']) {
   await page.waitForSelector('[role=status]:has-text("Suggested:")'); await audit('a typed-recall review');
   await page.goto(U + '#/battle/a1'); await page.waitForSelector('text=Start battle'); await audit('the battle setup');
   await page.getByRole('button', { name: 'Start battle' }).click(); await page.waitForSelector('#battle-input'); await audit('a battle round');
+  await page.goto(U + '#/typing/a1'); await page.waitForSelector('text=Stage 1: Byte'); await audit('the typing stages');
+  await page.getByRole('button', { name: 'Start stage' }).first().click(); await page.getByRole('button', { name: 'Go' }).click(); await page.waitForSelector('#typing-input'); await audit('a typing round');
   await page.goto(U + '#/learn'); await page.goto(U + '#/quiz/a1-d2'); await page.waitForSelector('text=Check answer'); await audit('a quiz question');
   await page.goto(U + '#/exam/a1'); await page.waitForSelector('text=Start exam'); await audit('the exam intro');
   await context.close();
