@@ -75,6 +75,19 @@ export interface SessionRow {
   dayKey: string;
 }
 
+/** How far a learner has got up the typing stages of one track. No row means never tried. */
+export interface TypingStageRow {
+  /** `<trackId>-<stage number>`. */
+  id: string;
+  trackId: TrackId;
+  n: number;
+  /** Times the stage was cleared. Above zero means it is cleared and the next one is open. */
+  clears: number;
+  /** Fastest copy-round speed on this stage, words per minute. Zero if none was copied yet. */
+  bestWpm: number;
+  lastAt: number;
+}
+
 export type LinkState = 'unlinked' | 'linked' | 'needs-reconnect';
 
 export interface SettingsRow {
@@ -110,6 +123,7 @@ export class LanternDB extends Dexie {
   quizAnswers!: Table<QuizAnswerRow, string>;
   exams!: Table<ExamRow, string>;
   pathProgress!: Table<PathProgressRow, string>;
+  typingStages!: Table<TypingStageRow, string>;
 
   constructor(name = 'lantern') {
     super(name);
@@ -126,6 +140,7 @@ export class LanternDB extends Dexie {
       exams: 'id, trackId, status',
     });
     this.version(3).stores({ pathProgress: 'nodeId, status' });
+    this.version(4).stores({ typingStages: 'id, trackId' });
   }
 }
 

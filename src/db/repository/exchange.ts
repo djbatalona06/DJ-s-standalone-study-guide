@@ -1,4 +1,4 @@
-import { db, type ExamRow, type PathProgressRow, type QuizAnswerRow, type ReviewLogRow, type SessionRow } from '../database';
+import { db, type ExamRow, type PathProgressRow, type QuizAnswerRow, type ReviewLogRow, type SessionRow, type TypingStageRow } from '../database';
 import type { CardState } from '../../domain/srs/srs';
 import { SCHEMA_VERSION, cleanCharacterName, getSettings, saveSettings } from './settings';
 
@@ -20,17 +20,20 @@ export interface BackupFile {
   exams?: ExamRow[];
   /** Added in schema 3. */
   pathProgress?: PathProgressRow[];
+  /** Added in schema 4. */
+  typingStages?: TypingStageRow[];
 }
 
 export async function exportProgress(at: number): Promise<BackupFile> {
   const settings = await getSettings();
-  const [cardState, reviewLog, sessions, quizAnswers, exams, pathProgress] = await Promise.all([
+  const [cardState, reviewLog, sessions, quizAnswers, exams, pathProgress, typingStages] = await Promise.all([
     db.cardState.toArray(),
     db.reviewLog.toArray(),
     db.sessions.toArray(),
     db.quizAnswers.toArray(),
     db.exams.filter((e) => e.status === 'done').toArray(),
     db.pathProgress.toArray(),
+    db.typingStages.toArray(),
   ]);
   return {
     app: 'lantern',
@@ -48,7 +51,12 @@ export async function exportProgress(at: number): Promise<BackupFile> {
     quizAnswers,
     exams,
     pathProgress,
+    typingStages,
   };
+}
+
+function mergeStage(a: TypingStageRow, b: TypingStageRow): TypingStageRow {
+  return { ...a, clears: Math.max(a.clears, b.clears), bestWpm: Math.max(a.bestWpm, b.bestWpm), lastAt: Math.max(a.lastAt, b.lastAt) };
 }
 
 export type ImportProblem = 'not-json' | 'not-lantern' | 'newer-version';
@@ -86,15 +94,16 @@ export function parseBackup(text: string): { ok: true; file: BackupFile } | { ok
  * Merges a backup into this device without ever deleting anything.
  *
  * - A card keeps whichever copy was reviewed last.
- * - Review logs, sessions, quiz answers and finished exams are unioned by id, and
- *   a career-path node keeps whichever copy changed last.
+ * - Review logs, sessions, quiz answers and finished exams are unioned by id, a
+ *   career-path node keeps whichever copy changed last, and typing stages keep
+ *   the best of each number.
  * - Settings and the study token stay as they are here, except that a device
  *   whose character has no name yet takes the backup's.
  */
 export async function importProgress(file: BackupFile): Promise<ImportSummary> {
   const summary: ImportSummary = { cardsAdded: 0, cardsUpdated: 0, reviewsAdded: 0, sessionsAdded: 0, answersAdded: 0, examsAdded: 0, pathUpdated: 0 };
 
-  await db.transaction('rw', [db.cardState, db.reviewLog, db.sessions, db.quizAnswers, db.exams, db.pathProgress], async () => {
+  await db.transaction('rw', [db.cardState, db.reviewLog, db.sessions, db.quizAnswers, db.exams, db.pathProgress, db.typingStages], async () => {
     for (const incoming of file.cardState) {
       const local = await db.cardState.get(incoming.cardId);
       if (!local) {
@@ -132,6 +141,12 @@ export async function importProgress(file: BackupFile): Promise<ImportSummary> {
         await db.pathProgress.put(incoming);
         summary.pathUpdated += 1;
       }
+    }
+
+    // Typing stages: progress only ever goes up, so take the best of each field.
+    for (const incoming of file.typingStages ?? []) {
+      const local = await db.typingStages.get(incoming.id);
+      await db.typingStages.put(local ? mergeStage(local, incoming) : incoming);
     }
   });
 

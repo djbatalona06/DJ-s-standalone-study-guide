@@ -7,7 +7,7 @@
  * a caption. Source of truth: HeartBeat `app/src/domain/study/award.ts` and
  * `app/functions/api/study/session.ts`.
  */
-export const XP_KINDS = ['deck', 'quiz', 'weekly', 'match', 'anatomy'] as const;
+export const XP_KINDS = ['deck', 'quiz', 'weekly', 'match', 'anatomy', 'typing'] as const;
 export type XpKind = (typeof XP_KINDS)[number];
 
 export const XP_VALUE: Record<XpKind, number> = {
@@ -16,6 +16,7 @@ export const XP_VALUE: Record<XpKind, number> = {
   weekly: 35,
   match: 10,
   anatomy: 15,
+  typing: 15,
 };
 
 export const XP_DAILY_CAP = 120;
@@ -34,10 +35,13 @@ export const KIND_FOR = {
   exam: 'weekly',
   matching: 'match',
   diagram: 'anatomy',
-  // HeartBeat rejects kinds it does not know, so these borrow an existing one until it accepts
-  // `battle`. Change the value here, nowhere else, when it does.
+  // HeartBeat rejects kinds it does not know, so `battle` still borrows an existing one.
+  // Change the value here, nowhere else, if it ever gets a kind of its own.
   study: 'deck',
   battle: 'match',
+  // Needs HeartBeat's `typing` kind (app/functions/api/study/session.ts). A server that has not
+  // got it answers 400 and the session is refused for good, so deploy HeartBeat first.
+  typing: 'typing',
 } as const satisfies Record<string, XpKind>;
 
 export type SessionMode = keyof typeof KIND_FOR;

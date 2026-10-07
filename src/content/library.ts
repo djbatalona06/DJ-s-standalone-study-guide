@@ -2,17 +2,25 @@ import { A1_CARDS } from './aplus-core1';
 import { A2_CARDS } from './aplus-core2';
 import { DIAGRAM_CARDS } from './diagram-cards';
 import { CS50_CARDS } from './cs50';
+import { SHORT_A1_CARDS } from './short-aplus1';
+import { SHORT_A2_CARDS } from './short-aplus2';
+import { SHORT_CS50_CARDS } from './short-cs50';
 import { DOMAINS, TRACKS, domainsOf } from './index';
 import type { Card, TrackId } from './types';
 
 /**
  * Every card, in one chunk. The screens that need card text load it through
  * `useLibrary`, so the first paint does not wait for around 300 cards it may
- * not show. Tracks, domains and the question banks stay in the main content
+ * not show. The `short-*` files are one-fact cards whose answers are short enough
+ * for the typing stages. Tracks, domains and the question banks stay in the main content
  * module because the shell and the readiness maths need only their ids.
  * A+ decks join `CARDS` as they are written.
  */
-export const CARDS: Card[] = [...CS50_CARDS, ...A1_CARDS, ...DIAGRAM_CARDS, ...A2_CARDS];
+export const CARDS: Card[] = [
+  ...CS50_CARDS, ...SHORT_CS50_CARDS,
+  ...A1_CARDS, ...DIAGRAM_CARDS, ...SHORT_A1_CARDS,
+  ...A2_CARDS, ...SHORT_A2_CARDS,
+];
 
 export const CARD_BY_ID: ReadonlyMap<string, Card> = new Map(CARDS.map((card) => [card.id, card]));
 

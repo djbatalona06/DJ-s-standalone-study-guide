@@ -5,3 +5,4 @@ export * from './path';
 export * from './quiz';
 export * from './sessions';
 export * from './settings';
+export * from './typing';
